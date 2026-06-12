@@ -133,13 +133,27 @@
 .qrCode {
   width: 140rpx;
   height: 140rpx;
-  background: #f0f0f0;
+  background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
   border-radius: $radius-md;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 64rpx;
   flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.qrIcon {
+  font-size: 64rpx;
+}
+
+.qrText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
 }
 
 .ticketDetails {
@@ -165,15 +179,54 @@
   color: $color-text-tertiary;
 }
 
+.ticketPrice {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+  margin-top: 4rpx;
+}
+
+.qrFullWrap {
+  padding: $spacing-md 0;
+  border-bottom: 1rpx dashed $color-border;
+}
+
+.qrFullBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-lg;
+  background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+  border-radius: $radius-md;
+}
+
+.qrFullIcon {
+  font-size: 120rpx;
+}
+
+.qrFullLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.qrFullCode {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  font-family: monospace;
+}
+
 .ticketFooter {
   padding-top: $spacing-md;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: $spacing-md;
 }
 
-.ticketTip {
-  font-size: $font-size-xs;
+.ticketRemove {
+  font-size: $font-size-sm;
   color: $color-text-tertiary;
 }
 
@@ -184,6 +237,115 @@
   border-radius: $radius-button;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.bindBtn {
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-page;
+  color: $color-text-primary;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.noTicket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-lg 0;
+  gap: $spacing-sm;
+}
+
+.noTicketIcon {
+  font-size: 80rpx;
+}
+
+.noTicketText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.buyModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+
+.buyContent {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-xl $radius-xl 0 0;
+  padding: $spacing-xl $page-padding;
+  padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
+}
+
+.buyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  text-align: center;
+}
+
+.buyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+  transition: background $transition-fast;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.buyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.buyType {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.buyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.buyPrice {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+}
+
+.buyClose {
+  margin-top: $spacing-lg;
+  text-align: center;
+  padding: $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
 }
 
 .menuCard {

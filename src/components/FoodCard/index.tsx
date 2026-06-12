@@ -1,22 +1,16 @@
 import React from 'react';
 import { View, Text, Image } from '@tarojs/components';
-import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import { FoodShop } from '@/types';
 
 interface FoodCardProps {
   shop: FoodShop;
+  onClick?: () => void;
 }
 
-const FoodCard: React.FC<FoodCardProps> = ({ shop }) => {
-  const handleClick = () => {
-    Taro.navigateTo({
-      url: `/pages/food/index?id=${shop.id}`,
-    });
-  };
-
+const FoodCard: React.FC<FoodCardProps> = ({ shop, onClick }) => {
   return (
-    <View className={styles.card} onClick={handleClick}>
+    <View className={styles.card} onClick={onClick}>
       <View className={styles.imageWrap}>
         <Image className={styles.image} src={shop.image} mode="aspectFill" />
         {shop.hasCoupon && (

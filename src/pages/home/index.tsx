@@ -17,14 +17,14 @@ const HomePage: React.FC = () => {
   });
 
   const featureItems = [
-    { icon: '🎫', name: '门票', path: '/pages/mine/index' },
-    { icon: '🗺️', name: '地图导览', path: '/pages/map/index' },
-    { icon: '🎭', name: '演出日程', path: '/pages/show/index' },
-    { icon: '⏱️', name: '排队提醒', path: '/pages/queue/index' },
+    { icon: '🎫', name: '我的门票', path: '/pages/mine/index', isTab: true },
+    { icon: '🗺️', name: '地图导览', path: '/pages/map/index', isTab: true },
+    { icon: '🎭', name: '演出日程', path: '/pages/show/index', isTab: true },
+    { icon: '⏱️', name: '排队提醒', path: '/pages/queue/index', isTab: true },
     { icon: '🍜', name: '餐饮购物', path: '/pages/food/index' },
     { icon: '👥', name: '亲友同行', path: '/pages/squad/index' },
     { icon: '🛟', name: '服务求助', path: '/pages/service/index' },
-    { icon: '🅿️', name: '停车记录', onClick: () => Taro.switchTab({ url: '/pages/mine/index' }) },
+    { icon: '🅿️', name: '停车记录', path: '/pages/squad/index' },
   ];
 
   const hotShows = shows.slice(0, 3);

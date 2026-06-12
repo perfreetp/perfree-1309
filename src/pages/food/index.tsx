@@ -1,16 +1,26 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import { View, Text, Image, ScrollView } from '@tarojs/components';
+import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classNames from 'classnames';
 import FoodCard from '@/components/FoodCard';
-import { foodShops, coupons } from '@/data/food';
+import { foodShops, coupons, menuItems } from '@/data/food';
+import { useAppStore } from '@/store/useAppStore';
 
 type TabType = 'all' | 'restaurant' | 'shop';
 
 const FoodPage: React.FC = () => {
+  const router = useRouter();
+  const { claimedCoupons, claimCoupon } = useAppStore();
   const [activeTab, setActiveTab] = useState<TabType>('all');
-  const [claimedCoupons, setClaimedCoupons] = useState<string[]>([]);
+  const [detailShopId, setDetailShopId] = useState<string | null>(null);
+
+  const shopIdFromUrl = router.params.id;
+  const viewingShop = shopIdFromUrl
+    ? foodShops.find((s) => s.id === shopIdFromUrl)
+    : detailShopId
+    ? foodShops.find((s) => s.id === detailShopId)
+    : null;
 
   const tabs = [
     { id: 'all' as TabType, name: '全部' },
@@ -23,15 +33,34 @@ const FoodPage: React.FC = () => {
     return foodShops.filter((s) => s.type === activeTab);
   }, [activeTab]);
 
-  const handleClaimCoupon = (couponId: string, e: any) => {
-    e.stopPropagation();
+  const shopCoupons = useMemo(() => {
+    if (!viewingShop) return [];
+    return coupons.filter((c) => c.shopId === viewingShop.id);
+  }, [viewingShop]);
+
+  const shopMenu = useMemo(() => {
+    if (!viewingShop || viewingShop.type !== 'restaurant') return [];
+    return menuItems;
+  }, [viewingShop]);
+
+  const handleClaimCoupon = (couponId: string, e?: any) => {
+    if (e) e.stopPropagation();
     if (claimedCoupons.includes(couponId)) {
       Taro.showToast({ title: '已领取', icon: 'none' });
       return;
     }
-    setClaimedCoupons([...claimedCoupons, couponId]);
+    claimCoupon(couponId);
     Taro.showToast({ title: '领取成功', icon: 'success' });
     console.log('[Food] 领取优惠券:', couponId);
+  };
+
+  const handleShopClick = (shopId: string) => {
+    setDetailShopId(shopId);
+    console.log('[Food] 查看商家:', shopId);
+  };
+
+  const handleBack = () => {
+    setDetailShopId(null);
   };
 
   const availableCoupons = coupons.filter((c) => {
@@ -39,6 +68,68 @@ const FoodPage: React.FC = () => {
     const shop = foodShops.find((s) => s.id === c.shopId);
     return shop?.type === activeTab;
   });
+
+  if (viewingShop) {
+    return (
+      <ScrollView className={styles.container} scrollY>
+        <Image className={styles.detailBanner} src={viewingShop.image} mode="aspectFill" />
+        <View className={styles.detailContent}>
+          <Text className={styles.detailName}>{viewingShop.name}</Text>
+          <View className={styles.detailRating}>
+            <Text>⭐ {viewingShop.rating}</Text>
+            <Text className={styles.detailDistance}>📍 {viewingShop.distance}</Text>
+          </View>
+          <Text className={styles.detailDesc}>{viewingShop.description}</Text>
+          <View className={styles.detailInfo}>
+            <Text className={styles.detailLocation}>📍 位置：{viewingShop.location}</Text>
+            <Text className={styles.detailType}>{viewingShop.type === 'restaurant' ? '🍽️ 餐厅' : '🛍️ 商铺'}</Text>
+          </View>
+
+          {shopCoupons.length > 0 && (
+            <View className={styles.detailSection}>
+              <Text className={styles.detailSectionTitle}>🎁 可用优惠券</Text>
+              {shopCoupons.map((coupon) => (
+                <View key={coupon.id} className={styles.detailCoupon}>
+                  <View className={styles.detailCouponLeft}>
+                    <Text className={styles.detailCouponAmount}>{coupon.discount}</Text>
+                    <Text className={styles.detailCouponCondition}>{coupon.condition}</Text>
+                  </View>
+                  <View
+                    className={classNames(
+                      styles.detailCouponBtn,
+                      claimedCoupons.includes(coupon.id) && styles.couponUsed
+                    )}
+                    onClick={() => handleClaimCoupon(coupon.id)}
+                  >
+                    <Text>{claimedCoupons.includes(coupon.id) ? '已领取 ✓' : '领取'}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {shopMenu.length > 0 && (
+            <View className={styles.detailSection}>
+              <Text className={styles.detailSectionTitle}>📋 菜单</Text>
+              {shopMenu.map((item) => (
+                <View key={item.id} className={styles.menuItem}>
+                  <View className={styles.menuInfo}>
+                    <Text className={styles.menuName}>{item.name}</Text>
+                    <Text className={styles.menuDesc}>{item.description}</Text>
+                  </View>
+                  <Text className={styles.menuPrice}>￥{item.price}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          <View className={styles.backBtn} onClick={handleBack}>
+            <Text>← 返回商家列表</Text>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <View className={styles.container}>
@@ -91,7 +182,9 @@ const FoodPage: React.FC = () => {
 
         <View className={styles.shopList}>
           {filteredShops.map((shop) => (
-            <FoodCard key={shop.id} shop={shop} />
+            <View key={shop.id} onClick={() => handleShopClick(shop.id)}>
+              <FoodCard shop={shop} />
+            </View>
           ))}
         </View>
       </ScrollView>

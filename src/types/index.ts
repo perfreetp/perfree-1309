@@ -96,11 +96,12 @@ export interface Review {
   id: string;
   targetId: string;
   targetType: 'scenic' | 'show';
-  targetName: string;
+  targetName?: string;
   rating: number;
   content: string;
-  images: string[];
+  images?: string[];
   date: string;
+  userName?: string;
 }
 
 export interface RoutePlan {

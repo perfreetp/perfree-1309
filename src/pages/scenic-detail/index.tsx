@@ -1,12 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, ScrollView } from '@tarojs/components';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, Image, ScrollView, Input } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { scenicSpots } from '@/data/scenic';
+import { useAppStore } from '@/store/useAppStore';
+import { Review } from '@/types';
+import classNames from 'classnames';
+
+const defaultReviews = [
+  { id: '1', name: '小明', rating: 5, content: '非常震撼的演出，值得一看！强烈推荐大家来体验。', date: '2026-06-10' },
+  { id: '2', name: '旅行者', rating: 4, content: '场景很逼真，演员表演也很到位，就是人有点多。', date: '2026-06-08' },
+];
 
 const ScenicDetailPage: React.FC = () => {
   const router = useRouter();
   const [spot, setSpot] = useState(scenicSpots[0]);
+  const { reviews, addReview } = useAppStore();
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState('');
 
   useEffect(() => {
     const id = router.params.id;
@@ -19,19 +31,55 @@ const ScenicDetailPage: React.FC = () => {
     }
   }, [router.params.id]);
 
-  const reviews = [
-    { id: '1', name: '小明', rating: 5, content: '非常震撼的演出，值得一看！强烈推荐大家来体验。', date: '2026-06-10' },
-    { id: '2', name: '旅行者', rating: 4, content: '场景很逼真，演员表演也很到位，就是人有点多。', date: '2026-06-08' },
-  ];
+  const spotReviews = useMemo(() => {
+    return reviews.filter((r) => r.targetId === spot.id && r.targetType === 'scenic');
+  }, [reviews, spot.id]);
+
+  const allReviews = [...spotReviews, ...defaultReviews];
 
   const handleNavigate = () => {
     console.log('[ScenicDetail] 导航');
     Taro.showToast({ title: '正在打开地图导航...', icon: 'none' });
   };
 
-  const handleReview = () => {
-    console.log('[ScenicDetail] 评价');
-    Taro.showToast({ title: '评价功能开发中', icon: 'none' });
+  const handleSubmitReview = () => {
+    if (!reviewContent.trim()) {
+      Taro.showToast({ title: '请输入评价内容', icon: 'none' });
+      return;
+    }
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const newReview: Review = {
+      id: `r_${Date.now()}`,
+      targetId: spot.id,
+      targetType: 'scenic',
+      rating: reviewRating,
+      content: reviewContent.trim(),
+      date: dateStr,
+      userName: '我',
+    };
+    addReview(newReview);
+    setReviewContent('');
+    setReviewRating(5);
+    setShowReviewForm(false);
+    Taro.showToast({ title: '评价成功', icon: 'success' });
+    console.log('[ScenicDetail] 提交评价:', newReview);
+  };
+
+  const renderStars = (current: number, interactive: boolean = false) => {
+    return (
+      <View className={styles.starsRow}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Text
+            key={star}
+            className={classNames(styles.star, star <= current && styles.starActive)}
+            onClick={() => interactive && setReviewRating(star)}
+          >
+            {star <= current ? '⭐' : '☆'}
+          </Text>
+        ))}
+      </View>
+    );
   };
 
   return (
@@ -88,16 +136,17 @@ const ScenicDetailPage: React.FC = () => {
             <Text className={styles.infoTitle}>
               <Text>💬</Text>
               <Text>游客评价</Text>
+              <Text className={styles.reviewCount}>({allReviews.length})</Text>
             </Text>
             <View className={styles.reviewList}>
-              {reviews.map((review) => (
+              {allReviews.map((review) => (
                 <View key={review.id} className={styles.reviewItem}>
                   <View className={styles.reviewHeader}>
                     <View className={styles.reviewAvatar}>
                       <Text>👤</Text>
                     </View>
                     <View className={styles.reviewUser}>
-                      <Text className={styles.reviewName}>{review.name}</Text>
+                      <Text className={styles.reviewName}>{review.name || review.userName}</Text>
                       <Text className={styles.reviewDate}>{review.date}</Text>
                     </View>
                     <Text className={styles.reviewRating}>⭐ {review.rating}</Text>
@@ -107,14 +156,44 @@ const ScenicDetailPage: React.FC = () => {
               ))}
             </View>
           </View>
+
+          {showReviewForm && (
+            <View className={styles.reviewForm}>
+              <Text className={styles.reviewFormTitle}>📝 写评价</Text>
+              <View className={styles.ratingSelect}>
+                <Text className={styles.ratingLabel}>评分：</Text>
+                {renderStars(reviewRating, true)}
+              </View>
+              <Input
+                className={styles.reviewInput}
+                placeholder="分享你的游玩体验..."
+                value={reviewContent}
+                onInput={(e) => setReviewContent(e.detail.value)}
+              />
+              <View className={styles.reviewFormActions}>
+                <View className={styles.reviewCancelBtn} onClick={() => setShowReviewForm(false)}>
+                  <Text>取消</Text>
+                </View>
+                <View className={styles.reviewSubmitBtn} onClick={handleSubmitReview}>
+                  <Text>提交评价</Text>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
       </ScrollView>
 
       <View className={styles.bottomBar}>
-        <View className={`${styles.bottomBtn} ${styles.btnSecondary}`} onClick={handleReview}>
+        <View
+          className={`${styles.bottomBtn} ${styles.btnSecondary}`}
+          onClick={() => setShowReviewForm(true)}
+        >
           <Text>📝 写评价</Text>
         </View>
-        <View className={`${styles.bottomBtn} ${styles.btnPrimary}`} onClick={handleNavigate}>
+        <View
+          className={`${styles.bottomBtn} ${styles.btnPrimary}`}
+          onClick={handleNavigate}
+        >
           <Text>🧭 导航前往</Text>
         </View>
       </View>

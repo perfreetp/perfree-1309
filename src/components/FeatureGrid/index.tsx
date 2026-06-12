@@ -7,6 +7,7 @@ interface FeatureItem {
   icon: string;
   name: string;
   path?: string;
+  isTab?: boolean;
   onClick?: () => void;
 }
 
@@ -20,7 +21,11 @@ const FeatureGrid: React.FC<FeatureGridProps> = ({ items, columns = 4 }) => {
     if (item.onClick) {
       item.onClick();
     } else if (item.path) {
-      Taro.navigateTo({ url: item.path });
+      if (item.isTab) {
+        Taro.switchTab({ url: item.path });
+      } else {
+        Taro.navigateTo({ url: item.path });
+      }
     }
   };
 

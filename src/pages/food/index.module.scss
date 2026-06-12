@@ -1,0 +1,127 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.tabBar {
+  display: flex;
+  background: $color-bg-card;
+  padding: $spacing-sm $page-padding;
+  gap: $spacing-sm;
+  box-shadow: $shadow-float;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabItem {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-sm 0;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary;
+    color: $color-text-white;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.couponSection {
+  padding: $spacing-md $page-padding;
+}
+
+.couponTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.couponScroll {
+  @include scroll-x-container;
+}
+
+.couponCard {
+  @include scroll-x-item(320rpx);
+  display: inline-flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE4C4 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-right: $spacing-sm;
+  position: relative;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 20rpx;
+    height: 20rpx;
+    background: $color-bg-page;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &::before { left: -10rpx; }
+  &::after { right: -10rpx; }
+}
+
+.couponAmount {
+  font-size: 40rpx;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+  margin-bottom: 4rpx;
+}
+
+.couponCondition {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.couponShop {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  @include text-ellipsis;
+}
+
+.couponBtn {
+  margin-top: $spacing-sm;
+  padding: $spacing-xs 0;
+  text-align: center;
+  background: $color-primary;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &.used {
+    background: $color-text-disabled;
+  }
+}
+
+.shopList {
+  padding: 0 $page-padding $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.listTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  padding: $spacing-md 0;
+}

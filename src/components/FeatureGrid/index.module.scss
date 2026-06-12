@@ -1,0 +1,43 @@
+@use '@/styles/variables.scss' as *;
+
+.grid {
+  display: grid;
+  gap: $spacing-lg 0;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+}
+
+.iconWrap {
+  width: 96rpx;
+  height: 96rpx;
+  background: linear-gradient(135deg, rgba(200, 16, 46, 0.1) 0%, rgba(212, 168, 75, 0.1) 100%);
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  font-size: 44rpx;
+}
+
+.name {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}

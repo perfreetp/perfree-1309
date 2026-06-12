@@ -1,0 +1,141 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 40rpx;
+}
+
+.statsCard {
+  margin: $spacing-md $page-padding;
+  background: $gradient-primary;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+}
+
+.statsTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  opacity: 0.9;
+  margin-bottom: $spacing-md;
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-around;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statNum {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  opacity: 0.8;
+  margin-top: 4rpx;
+}
+
+.tipsSection {
+  margin: 0 $page-padding $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.tipsHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.tipsIcon {
+  font-size: 32rpx;
+}
+
+.tipsTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.tipItem {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  padding-left: $spacing-md;
+  position: relative;
+  line-height: 1.6;
+
+  &::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: $color-primary;
+    font-weight: bold;
+  }
+}
+
+.filterBar {
+  display: flex;
+  padding: 0 $page-padding $spacing-md;
+  gap: $spacing-sm;
+}
+
+.filterBtn {
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  box-shadow: $shadow-card;
+
+  &.active {
+    background: $color-primary;
+    color: $color-text-white;
+  }
+}
+
+.queueList {
+  padding: 0 $page-padding;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.sectionHeader {
+  padding: 0 $page-padding $spacing-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.planBtn {
+  padding: $spacing-sm $spacing-md;
+  background: $color-gold;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}

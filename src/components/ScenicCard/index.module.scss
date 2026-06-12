@@ -1,0 +1,133 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  gap: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.cardVertical {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.imageH {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.imageWrapVertical {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.category {
+  position: absolute;
+  top: $spacing-sm;
+  left: $spacing-sm;
+  background: rgba(200, 16, 46, 0.9);
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.contentVertical {
+  padding: $spacing-md;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+.name {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.desc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  @include text-ellipsis-multi(2);
+  margin-bottom: $spacing-sm;
+  line-height: 1.4;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.star {
+  font-size: 24rpx;
+}
+
+.ratingText {
+  font-size: $font-size-sm;
+  color: $color-text-gold;
+  font-weight: $font-weight-medium;
+}
+
+.meta {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.metaItem {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.tags {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.tag {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: $color-bg-tag;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}

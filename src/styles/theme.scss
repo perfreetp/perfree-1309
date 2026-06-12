@@ -1,0 +1,40 @@
+// ============================================
+// 主题配色变量（开封万岁山游玩管家）
+// ============================================
+
+// 品牌主题色：朱红色 - 体现开封古都与武侠文化
+$color-primary: #C8102E;
+$color-primary-light: #E63946;
+$color-primary-dark: #9B0A1E;
+
+// 辅助色：金色 - 皇家气质点缀
+$color-gold: #D4A84B;
+$color-gold-light: #E8C97A;
+
+// 功能色
+$color-success: #00B42A;
+$color-warning: #FF7D00;
+$color-error: #F53F3F;
+$color-info: #165DFF;
+
+// 背景色
+$color-bg-page: #FAF7F2;
+$color-bg-card: #FFFFFF;
+$color-bg-hover: #F2F3F5;
+$color-bg-tag: rgba(200, 16, 46, 0.08);
+
+// 文本色
+$color-text-primary: #1D2129;
+$color-text-secondary: #4E5969;
+$color-text-tertiary: #86909C;
+$color-text-disabled: #C9CDD4;
+$color-text-white: #FFFFFF;
+$color-text-gold: #D4A84B;
+
+// 边框色
+$color-border: #E5E6EB;
+$color-divider: #F2F3F5;
+
+// 渐变
+$gradient-primary: linear-gradient(135deg, #C8102E 0%, #E63946 100%);
+$gradient-gold: linear-gradient(135deg, #D4A84B 0%, #E8C97A 100%);

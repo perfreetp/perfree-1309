@@ -3,7 +3,6 @@ import { View, Text, Image, Input, ScrollView } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classNames from 'classnames';
-import ScenicCard from '@/components/ScenicCard';
 import { scenicSpots, facilities } from '@/data/scenic';
 import { useAppStore } from '@/store/useAppStore';
 import { NavTarget } from '@/types';
@@ -166,6 +165,23 @@ const MapPage: React.FC = () => {
     console.log('[Map] 开始导航到:', item.name);
   };
 
+  const handleNavigateSpot = (spotId: string) => {
+    const spot = scenicSpots.find((s) => s.id === spotId);
+    if (!spot) return;
+    const pos = spotPositions[spotId] || { left: 50, top: 50, distance: 150 };
+    const target: NavTarget = {
+      id: spotId,
+      name: spot.name,
+      icon: '🏯',
+      type: 'spot',
+      distanceMeters: pos.distance,
+      leftPct: pos.left,
+      topPct: pos.top,
+    };
+    setNavTarget(target);
+    Taro.showToast({ title: `导航至${spot.name}`, icon: 'none' });
+  };
+
   const handleNavigateFacility = (f: any) => {
     const target: NavTarget = {
       id: f.id,
@@ -310,9 +326,7 @@ const MapPage: React.FC = () => {
                     key={spot.id}
                     className={classNames(styles.marker, isTarget && styles.markerTarget)}
                     style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
-                    onClick={() => {
-                      Taro.navigateTo({ url: `/pages/scenic-detail/index?id=${spot.id}` });
-                    }}
+                    onClick={() => handleNavigateSpot(spot.id)}
                   >
                     <Text className={styles.markerIcon}>🏯</Text>
                     <Text className={styles.markerLabel}>{spot.name}</Text>
@@ -375,9 +389,59 @@ const MapPage: React.FC = () => {
 
             {activeTab === 'spot' ? (
               <View className={styles.spotList}>
-                {scenicSpots.map((spot) => (
-                  <ScenicCard key={spot.id} spot={spot} />
-                ))}
+                {scenicSpots.map((spot) => {
+                  const pos = spotPositions[spot.id] || { left: 50, top: 50, distance: 150 };
+                  const isTarget = navTarget?.id === spot.id;
+                  return (
+                    <View
+                      key={spot.id}
+                      className={`${styles.mapSpotCard} ${isTarget ? styles.mapSpotCardActive : ''}`}
+                    >
+                      <Image className={styles.mapSpotImage} src={spot.image} mode="aspectFill" />
+                      <View className={styles.mapSpotContent}>
+                        <View className={styles.mapSpotHeader}>
+                          <Text className={styles.mapSpotName}>{spot.name}</Text>
+                          <View className={styles.mapSpotRating}>
+                            <Text>⭐</Text>
+                            <Text>{spot.rating}</Text>
+                          </View>
+                        </View>
+                        <View className={styles.mapSpotLocation}>
+                          <Text className={styles.mapSpotLocIcon}>📍</Text>
+                          <Text className={styles.mapSpotLocText}>{spot.category}</Text>
+                        </View>
+                        <View className={styles.mapSpotStats}>
+                          <View className={styles.mapSpotStat}>
+                            <Text className={styles.mapSpotStatLabel}>距离</Text>
+                            <Text className={styles.mapSpotStatValue}>{pos.distance}m</Text>
+                          </View>
+                          <View className={styles.mapSpotStat}>
+                            <Text className={styles.mapSpotStatLabel}>步行</Text>
+                            <Text className={styles.mapSpotStatValue}>{calcWalkTime(pos.distance)}</Text>
+                          </View>
+                          <View className={styles.mapSpotStat}>
+                            <Text className={styles.mapSpotStatLabel}>游玩</Text>
+                            <Text className={styles.mapSpotStatValue}>{spot.duration}</Text>
+                          </View>
+                        </View>
+                        <View className={styles.mapSpotActions}>
+                          <View
+                            className={styles.mapSpotDetailBtn}
+                            onClick={() => Taro.navigateTo({ url: `/pages/scenic-detail/index?id=${spot.id}` })}
+                          >
+                            <Text>详情</Text>
+                          </View>
+                          <View
+                            className={styles.mapSpotNavBtn}
+                            onClick={() => handleNavigateSpot(spot.id)}
+                          >
+                            <Text>{isTarget ? '✓ 正在导航' : '去这里'}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
               </View>
             ) : (
               <View className={styles.facilityList}>

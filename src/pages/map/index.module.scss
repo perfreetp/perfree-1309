@@ -432,3 +432,139 @@
   from { transform: translateY(0); }
   to { transform: translateY(-8rpx); }
 }
+
+.mapSpotCard {
+  display: flex;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  gap: 24rpx;
+  margin-bottom: 20rpx;
+  border: 2rpx solid #f2f3f5;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.2s;
+}
+
+.mapSpotCardActive {
+  border-color: #C8102E;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+  box-shadow: 0 8rpx 24rpx rgba(200, 16, 46, 0.1);
+}
+
+.mapSpotImage {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+
+.mapSpotContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+
+.mapSpotHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mapSpotName {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1d2129;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapSpotRating {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: 26rpx;
+  color: #FF8A00;
+  font-weight: 600;
+}
+
+.mapSpotLocation {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.mapSpotLocIcon {
+  font-size: 24rpx;
+}
+
+.mapSpotLocText {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.mapSpotStats {
+  display: flex;
+  gap: 16rpx;
+  background: #f7f8fa;
+  border-radius: 12rpx;
+  padding: 12rpx 16rpx;
+}
+
+.mapSpotStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  min-width: 0;
+}
+
+.mapSpotStatLabel {
+  font-size: 20rpx;
+  color: #86909c;
+}
+
+.mapSpotStatValue {
+  font-size: 24rpx;
+  color: #1d2129;
+  font-weight: 600;
+  text-align: center;
+}
+
+.mapSpotActions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.mapSpotDetailBtn {
+  flex: 1;
+  height: 64rpx;
+  background: #f7f8fa;
+  border: 2rpx solid #e5e6eb;
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: #4e5969;
+  font-weight: 500;
+}
+
+.mapSpotNavBtn {
+  flex: 2;
+  height: 64rpx;
+  background: linear-gradient(135deg, #C8102E 0%, #ff6b6b 100%);
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(200, 16, 46, 0.25);
+}

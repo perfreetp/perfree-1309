@@ -3,7 +3,17 @@ import { View, Text, ScrollView, Image } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useAppStore } from '@/store/useAppStore';
 import { coupons, foodShops } from '@/data/food';
+import { NavTarget, SingleTicket } from '@/types';
 import styles from './index.module.scss';
+
+const spotPositions: Record<string, { left: number; top: number; distance: number; icon: string }> = {
+  s001: { left: 25, top: 30, distance: 120, icon: '🏯' },
+  s002: { left: 70, top: 25, distance: 200, icon: '🎭' },
+  s003: { left: 20, top: 70, distance: 180, icon: '⛩️' },
+  s004: { left: 75, top: 65, distance: 300, icon: '🏛️' },
+  s005: { left: 50, top: 45, distance: 90, icon: '🌉' },
+  s006: { left: 35, top: 55, distance: 150, icon: '🎪' },
+};
 
 const getTimePeriod = (time: string) => {
   const h = parseInt(time.split(':')[0], 10);
@@ -19,8 +29,32 @@ const periodLabels = {
 };
 
 const ItineraryPage: React.FC = () => {
-  const { itinerary, squadMembers, claimedCoupons, removeItineraryItem, toggleMemberInItem } = useAppStore();
+  const {
+    itinerary,
+    squadMembers,
+    squadGathered,
+    tickets,
+    claimedCoupons,
+    removeItineraryItem,
+    toggleMemberInItem,
+    setNavTarget,
+  } = useAppStore();
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showCouponModal, setShowCouponModal] = useState<string | null>(null);
+  const [showTicketFor, setShowTicketFor] = useState<string | null>(null);
+
+  const membersWithStatus = useMemo(() => {
+    return squadMembers.map((m) => {
+      const ticket = tickets.find((t) => t.holderName === m.name);
+      return {
+        ...m,
+        hasTicket: !!ticket,
+        ticket,
+        gathered: !!squadGathered[m.id],
+      };
+    });
+  }, [squadMembers, tickets, squadGathered]);
 
   const grouped = useMemo(() => {
     const groups: Record<string, typeof itinerary> = {
@@ -44,19 +78,51 @@ const ItineraryPage: React.FC = () => {
   };
 
   const handleGoDetail = (item: any) => {
-    if (item.type === 'show') {
+    if (item.type === 'scenic') {
+      Taro.navigateTo({ url: `/pages/scenic-detail/index?id=${item.targetId}` });
+    } else if (item.type === 'show') {
       Taro.navigateTo({ url: `/pages/show-detail/index?id=${item.targetId}` });
-    } else if (item.type === 'scenic') {
-      Taro.switchTab({ url: '/pages/map/index' });
-      Taro.showToast({ title: '已切换到地图', icon: 'none' });
     } else if (item.type === 'food') {
       Taro.navigateTo({ url: `/pages/food/index?id=${item.targetId}` });
     }
   };
 
   const handleGoMap = (item: any) => {
+    let nav: NavTarget | null = null;
+    if (item.type === 'scenic') {
+      const pos = spotPositions[item.targetId] || { left: 50, top: 50, distance: 150, icon: '📍' };
+      nav = {
+        id: item.targetId,
+        name: item.name,
+        icon: pos.icon,
+        type: 'spot',
+        distanceMeters: pos.distance,
+        leftPct: pos.left,
+        topPct: pos.top,
+      };
+    } else if (item.type === 'food') {
+      nav = {
+        id: item.targetId,
+        name: item.name,
+        icon: '🍜',
+        type: 'food',
+        distanceMeters: 120,
+        leftPct: 45,
+        topPct: 55,
+      };
+    } else if (item.type === 'show') {
+      nav = {
+        id: item.targetId,
+        name: item.name,
+        icon: '🎭',
+        type: 'show',
+        distanceMeters: 180,
+        leftPct: 60,
+        topPct: 40,
+      };
+    }
+    if (nav) setNavTarget(nav);
     Taro.switchTab({ url: '/pages/map/index' });
-    Taro.showToast({ title: '已切换到地图', icon: 'none' });
   };
 
   const handleDeleteItem = (id: string, name: string) => {
@@ -87,6 +153,14 @@ const ItineraryPage: React.FC = () => {
   const today = new Date();
   const todayStr = `${today.getMonth() + 1}月${today.getDate()}日`;
 
+  const clickedCoupon = showCouponModal ? coupons.find((c) => c.id === showCouponModal) : null;
+  const clickedMemberTicket = showTicketFor
+    ? membersWithStatus.find((m) => m.id === showTicketFor)?.ticket || null
+    : null;
+  const clickedMember = showTicketFor
+    ? membersWithStatus.find((m) => m.id === showTicketFor)
+    : null;
+
   return (
     <View className={styles.page}>
       <View className={styles.header}>
@@ -100,7 +174,7 @@ const ItineraryPage: React.FC = () => {
             <Text className={styles.statText}>项安排</Text>
           </View>
           <View className={styles.statItem}>
-            <Text className={styles.statNum}>{squadMembers.filter((m) => m.isOnline).length}</Text>
+            <Text className={styles.statNum}>{membersWithStatus.filter((m) => m.isOnline).length}</Text>
             <Text className={styles.statText}>人同行</Text>
           </View>
         </View>
@@ -169,7 +243,7 @@ const ItineraryPage: React.FC = () => {
                               </View>
                               <Text
                                 className={styles.stopType}
-                                style={{ color: getTypeColor(item.type).split(',')[0].replace('linear-gradient(135deg,', '') }}
+                                style={{ color: '#C8102E' }}
                               >
                                 {item.type === 'show' ? '演出' : item.type === 'food' ? '餐饮' : '景点'}
                               </Text>
@@ -198,23 +272,39 @@ const ItineraryPage: React.FC = () => {
 
                             {foodCoupons.length > 0 && (
                               <View className={styles.couponHint}>
-                                <Text className={styles.couponHintIcon}>🎫</Text>
-                                <Text className={styles.couponHintText}>
-                                  您有{foodCoupons.length}张可用券
-                                </Text>
-                                {foodCoupons.slice(0, 2).map((c) => (
-                                  <View key={c.id} className={styles.couponMini}>
-                                    <Text className={styles.couponMiniAmount}>¥{c.amount}</Text>
-                                    <Text className={styles.couponMiniDesc}>满{c.minSpend}可用</Text>
-                                  </View>
-                                ))}
+                                <View className={styles.couponHintHeader}>
+                                  <Text className={styles.couponHintIcon}>🎫</Text>
+                                  <Text className={styles.couponHintText}>
+                                    您有{foodCoupons.length}张可用券，点击查看
+                                  </Text>
+                                </View>
+                                <View className={styles.couponMiniList}>
+                                  {foodCoupons.map((c) => (
+                                    <View
+                                      key={c.id}
+                                      className={styles.couponMini}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowCouponModal(c.id);
+                                      }}
+                                    >
+                                      <View className={styles.couponMiniAmountBox}>
+                                        <Text className={styles.couponMiniAmount}>{c.discount}</Text>
+                                      </View>
+                                      <View className={styles.couponMiniDescBox}>
+                                        <Text className={styles.couponMiniTitle}>{c.title}</Text>
+                                        <Text className={styles.couponMiniDesc}>{c.condition}</Text>
+                                      </View>
+                                    </View>
+                                  ))}
+                                </View>
                               </View>
                             )}
 
                             <View className={styles.membersRow}>
                               <Text className={styles.membersLabel}>同行：</Text>
                               <View className={styles.memberChips}>
-                                {squadMembers.map((m) => {
+                                {membersWithStatus.map((m) => {
                                   const selected = item.memberIds.includes(m.id);
                                   return (
                                     <View
@@ -222,13 +312,43 @@ const ItineraryPage: React.FC = () => {
                                       className={`${styles.memberChip} ${selected ? styles.memberChipActive : ''}`}
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        toggleMemberInItem(item.id, m.id);
+                                        if (selected && m.hasTicket) {
+                                          setShowTicketFor(m.id);
+                                        } else {
+                                          toggleMemberInItem(item.id, m.id);
+                                        }
+                                      }}
+                                      onLongPress={(e) => {
+                                        e.stopPropagation();
+                                        if (m.hasTicket) {
+                                          setShowTicketFor(m.id);
+                                        }
                                       }}
                                     >
-                                      <Text className={styles.memberChipAvatar}>
-                                        {m.name.charAt(0)}
-                                      </Text>
-                                      <Text className={styles.memberChipName}>{m.name}</Text>
+                                      <View className={styles.memberChipAvatarBox}>
+                                        <Text className={styles.memberChipAvatar}>
+                                          {m.name.charAt(0)}
+                                        </Text>
+                                        {m.gathered && (
+                                          <View className={styles.memberChipGathered}>
+                                            <Text>✓</Text>
+                                          </View>
+                                        )}
+                                      </View>
+                                      <View className={styles.memberChipNameBox}>
+                                        <Text className={styles.memberChipName}>{m.name}</Text>
+                                        <View className={styles.memberChipBadges}>
+                                          {m.hasTicket && (
+                                            <Text className={styles.badgeTicket}>🎫有票</Text>
+                                          )}
+                                          {m.gathered && (
+                                            <Text className={styles.badgeGathered}>✓已到</Text>
+                                          )}
+                                          {!m.hasTicket && !m.gathered && (
+                                            <Text className={styles.badgeNone}>待购票</Text>
+                                          )}
+                                        </View>
+                                      </View>
                                     </View>
                                   );
                                 })}
@@ -278,6 +398,97 @@ const ItineraryPage: React.FC = () => {
           </>
         )}
       </ScrollView>
+
+      {clickedCoupon && (
+        <View className={styles.modalMask} onClick={() => setShowCouponModal(null)}>
+          <View className={styles.couponDetailModal} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.couponDetailCard}>
+              <View className={styles.couponDetailAmount}>
+                <Text className={styles.couponDetailAmountText}>{clickedCoupon.discount}</Text>
+                <Text className={styles.couponDetailCond}>{clickedCoupon.condition}</Text>
+              </View>
+              <View className={styles.couponDetailInfo}>
+                <Text className={styles.couponDetailTitle}>{clickedCoupon.title}</Text>
+                <View className={styles.couponDetailRow}>
+                  <Text className={styles.couponDetailLabel}>适用门店</Text>
+                  <Text className={styles.couponDetailValue}>{clickedCoupon.shopName}</Text>
+                </View>
+                <View className={styles.couponDetailRow}>
+                  <Text className={styles.couponDetailLabel}>有效期至</Text>
+                  <Text className={styles.couponDetailValue}>{clickedCoupon.expireDate}</Text>
+                </View>
+                <View className={styles.couponDetailRow}>
+                  <Text className={styles.couponDetailLabel}>适用时间</Text>
+                  <Text className={styles.couponDetailValue}>全天可用（营业时间内）</Text>
+                </View>
+              </View>
+            </View>
+            <View className={styles.modalConfirmBtn} onClick={() => setShowCouponModal(null)}>
+              <Text>知道了</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {clickedMember && clickedMemberTicket && (
+        <View className={styles.modalMask} onClick={() => setShowTicketFor(null)}>
+          <View className={styles.ticketDetailModal} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.ticketCard}>
+              <View className={styles.ticketCardHeader}>
+                <Text className={styles.ticketCardTitle}>万岁山入园凭证</Text>
+                <Text className={styles.ticketCardNo}>票号：{clickedMemberTicket.id}</Text>
+              </View>
+              <View className={styles.ticketCardBody}>
+                <View className={styles.ticketQr}>
+                  <View className={styles.qrPlaceholder}>
+                    <Text style={{ fontSize: 80 }}>📱</Text>
+                    <Text style={{ fontSize: 22, color: '#86909c', marginTop: 12 }}>请对准闸机扫码</Text>
+                  </View>
+                </View>
+                <View className={styles.ticketInfo}>
+                  <View className={styles.ticketInfoRow}>
+                    <Text className={styles.ticketInfoLabel}>持有人</Text>
+                    <Text className={styles.ticketInfoValue}>{clickedMember.name}</Text>
+                  </View>
+                  <View className={styles.ticketInfoRow}>
+                    <Text className={styles.ticketInfoLabel}>票种</Text>
+                    <Text className={styles.ticketInfoValue}>{clickedMemberTicket.type}</Text>
+                  </View>
+                  <View className={styles.ticketInfoRow}>
+                    <Text className={styles.ticketInfoLabel}>价格</Text>
+                    <Text className={styles.ticketInfoValue}>￥{clickedMemberTicket.price}</Text>
+                  </View>
+                  <View className={styles.ticketInfoRow}>
+                    <Text className={styles.ticketInfoLabel}>有效期</Text>
+                    <Text className={styles.ticketInfoValue}>{clickedMemberTicket.validDate}</Text>
+                  </View>
+                </View>
+              </View>
+              <View className={styles.ticketCardFooter}>
+                <Text>请妥善保管，仅限本人使用</Text>
+              </View>
+            </View>
+            <View className={styles.modalConfirmBtn} onClick={() => setShowTicketFor(null)}>
+              <Text>关闭</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {clickedMember && !clickedMemberTicket && showTicketFor && (
+        <View className={styles.modalMask} onClick={() => setShowTicketFor(null)}>
+          <View className={styles.ticketDetailModal} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.emptyTicketTip}>
+              <Text style={{ fontSize: 60, marginBottom: 16 }}>🎫</Text>
+              <Text className={styles.emptyTicketTitle}>{clickedMember.name}暂无门票</Text>
+              <Text className={styles.emptyTicketDesc}>请先前往门票购买页面为其分票</Text>
+            </View>
+            <View className={styles.modalConfirmBtn} onClick={() => setShowTicketFor(null)}>
+              <Text>好的</Text>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

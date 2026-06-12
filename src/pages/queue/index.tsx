@@ -27,11 +27,12 @@ interface PlanStop {
 const getNextShowTime = (name: string, currentMin: number): string | undefined => {
   const matched = shows.find((s) => s.name.includes(name) || name.includes(s.name) || s.venue.includes(name));
   if (!matched || !matched.times.length) return undefined;
-  const upcoming = matched.times.find((t) => {
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m > currentMin;
-  });
-  return upcoming || matched.times[matched.times.length - 1];
+  return matched.times[0];
+};
+
+const getAllShowTimes = (name: string): string[] => {
+  const matched = shows.find((s) => s.name.includes(name) || name.includes(s.name) || s.venue.includes(name));
+  return matched ? matched.times : [];
 };
 
 const timeToMinutes = (t: string): number => {
@@ -39,121 +40,185 @@ const timeToMinutes = (t: string): number => {
   return h * 60 + m;
 };
 
-const getPeriod = (time: string): 'morning' | 'afternoon' | 'evening' => {
-  const m = timeToMinutes(time);
-  if (m < 11 * 60) return 'morning';
-  if (m < 17 * 60) return 'afternoon';
+const minutesToTime = (mins: number): string => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+};
+
+const getPeriod = (mins: number): 'morning' | 'afternoon' | 'evening' => {
+  if (mins < 11 * 60) return 'morning';
+  if (mins < 17 * 60) return 'afternoon';
   return 'evening';
+};
+
+const getCurrentPeriod = (currentMin: number): 'morning' | 'afternoon' | 'evening' => {
+  return getPeriod(currentMin);
 };
 
 const generatePlan = (): PlanStop[] => {
   const now = new Date();
   const currentMin = now.getHours() * 60 + now.getMinutes();
+  const currentPeriod = getCurrentPeriod(currentMin);
 
-  const itemsWithTime = queueItems.map((item) => {
+  const periodOrder: Record<string, number> = { morning: 0, afternoon: 1, evening: 2 };
+
+  interface ScoredItem {
+    id: string;
+    name: string;
+    category: '景点' | '演出';
+    isShow: boolean;
+    waitTime: number;
+    image?: string;
+    showTime?: string;
+    showTimeMin: number;
+    period: 'morning' | 'afternoon' | 'evening';
+    isPast: boolean;
+    score: number;
+    detailId?: string;
+    reason: string;
+  }
+
+  const scored: ScoredItem[] = [];
+
+  queueItems.forEach((item) => {
     const isShow = item.category === '演出';
-    const showTime = isShow ? getNextShowTime(item.name, currentMin) : undefined;
-    const sortTime = showTime
-      ? timeToMinutes(showTime)
-      : currentMin + item.waitTime + 30;
-    const period = showTime ? getPeriod(showTime) : 'afternoon';
+    const showTimes = isShow ? getAllShowTimes(item.name) : [];
     const detailId = isShow
       ? shows.find((s) => s.name.includes(item.name) || item.name.includes(s.name) || s.venue.includes(item.name))?.id
       : undefined;
 
-    const pastShow = isShow && showTime ? timeToMinutes(showTime) <= currentMin : false;
+    if (isShow && showTimes.length > 0) {
+      showTimes.forEach((t) => {
+        const tMin = timeToMinutes(t);
+        const isPast = tMin <= currentMin;
+        const period = getPeriod(tMin);
+        const minsUntil = tMin - currentMin;
 
-    return {
-      ...item,
-      isShow,
-      showTime,
-      sortTime,
-      period,
-      detailId,
-      pastShow,
-    };
-  });
+        let score = 0;
+        let reason = '';
 
-  const validItems = itemsWithTime.filter((i) => !i.pastShow);
-  const pastItems = itemsWithTime.filter((i) => i.pastShow);
+        if (isPast) {
+          score = -999;
+          reason = `${t}场已开场，建议下一场`;
+        } else {
+          const periodWeight =
+            periodOrder[period] - periodOrder[currentPeriod] < 0
+              ? -1000
+              : (2 - Math.abs(periodOrder[period] - periodOrder[currentPeriod])) * 100;
+          score += periodWeight;
 
-  const scoreItem = (item: typeof validItems[0]): number => {
-    let score = 0;
-    if (item.isShow && item.showTime) {
-      const minsUntil = timeToMinutes(item.showTime) - currentMin;
-      if (minsUntil > 0 && minsUntil < 60) score += 50;
-      else if (minsUntil >= 60 && minsUntil < 180) score += 30;
-      else score += 10;
-    }
-    score += Math.max(0, 40 - item.waitTime);
-    const periodBonus: Record<string, number> = {
-      morning: currentMin < 11 * 60 ? 20 : -10,
-      afternoon: currentMin >= 11 * 60 && currentMin < 17 * 60 ? 20 : 0,
-      evening: currentMin >= 17 * 60 ? 20 : -5,
-    };
-    score += periodBonus[item.period] || 0;
-    return score;
-  };
+          if (minsUntil < 60) {
+            score += 80;
+            reason = `${Math.max(1, minsUntil)}分钟后开场，赶紧过去`;
+          } else if (minsUntil < 180) {
+            score += 60;
+            reason = `${Math.floor(minsUntil / 60)}小时后开场，提前排队`;
+          } else {
+            score += 20;
+            reason = `${t}开场，安排在后面`;
+          }
 
-  const sorted = [...validItems].sort((a, b) => scoreItem(b) - scoreItem(a));
+          score += Math.max(0, 30 - item.waitTime);
+        }
 
-  const plan: PlanStop[] = [];
-  const distances = ['50m', '180m', '300m', '220m'];
-  const walkTimes = ['1分钟', '3分钟', '5分钟', '4分钟'];
-  const reasons = [
-    '距离开场近，趁人少先排队入场',
-    '当前等待时间最短，顺路游玩',
-    '下午黄金时段，排队体验好',
-    '夜场特色演出，强烈推荐',
-  ];
-
-  sorted.slice(0, 4).forEach((item, idx) => {
-    let reason = reasons[idx] || '推荐游玩';
-    if (item.isShow && item.showTime) {
-      const minsUntil = timeToMinutes(item.showTime) - currentMin;
-      if (minsUntil > 0 && minsUntil < 60) {
-        reason = `${Math.floor(minsUntil)}分钟后开场，建议马上过去`;
-      } else if (minsUntil >= 60) {
-        reason = `${Math.floor(minsUntil / 60)}小时后开场，提前到达占好位`;
-      } else {
-        reason = '今日最后一场，别错过';
-      }
-    } else if (item.waitTime <= 10) {
-      reason = `当前仅${item.waitTime}分钟，错峰好时机`;
-    }
-
-    plan.push({
-      id: item.id,
-      name: item.name,
-      category: item.category,
-      type: item.isShow ? 'show' : 'scenic',
-      waitTime: item.waitTime,
-      distance: distances[idx] || '150m',
-      walkTime: walkTimes[idx] || '2分钟',
-      nextShowTime: item.showTime,
-      image: item.image,
-      reason,
-      detailId: item.detailId,
-    });
-  });
-
-  if (plan.length < 4 && pastItems.length > 0) {
-    pastItems.slice(0, 4 - plan.length).forEach((item, idx) => {
-      plan.push({
+        scored.push({
+          id: `${item.id}-${t}`,
+          name: item.name,
+          category: item.category,
+          isShow: true,
+          waitTime: item.waitTime,
+          image: item.image,
+          showTime: t,
+          showTimeMin: tMin,
+          period,
+          isPast,
+          score,
+          detailId,
+          reason,
+        });
+      });
+    } else {
+      const period: 'morning' | 'afternoon' | 'evening' = 'afternoon';
+      const score = 30 + Math.max(0, 30 - item.waitTime);
+      scored.push({
         id: item.id,
         name: item.name,
         category: item.category,
-        type: item.isShow ? 'show' : 'scenic',
+        isShow: false,
         waitTime: item.waitTime,
-        distance: '350m',
-        walkTime: '6分钟',
-        nextShowTime: item.showTime,
         image: item.image,
-        reason: '今日场次已过，可明天再来',
-        detailId: item.detailId,
+        showTime: undefined,
+        showTimeMin: currentMin + item.waitTime,
+        period,
+        isPast: false,
+        score,
+        detailId: undefined,
+        reason: item.waitTime <= 10 ? `仅${item.waitTime}分钟，错峰好时机` : '顺路安排游玩',
       });
+    }
+  });
+
+  const pastItems = scored.filter((s) => s.isPast).sort((a, b) => b.showTimeMin - a.showTimeMin);
+  const validItems = scored.filter((s) => !s.isPast);
+
+  const periodGroup: Record<string, typeof validItems> = { morning: [], afternoon: [], evening: [] };
+  validItems.forEach((v) => {
+    if (periodGroup[v.period]) periodGroup[v.period].push(v);
+  });
+
+  const sortPeriod = (arr: typeof validItems) =>
+    [...arr].sort((a, b) => {
+      if (a.isShow && b.isShow) return a.showTimeMin - b.showTimeMin;
+      if (a.isShow) return -1;
+      if (b.isShow) return 1;
+      return a.waitTime - b.waitTime;
     });
+
+  const sortedValid: ScoredItem[] = [];
+  ['morning', 'afternoon', 'evening'].forEach((p) => {
+    if (periodOrder[p] >= periodOrder[currentPeriod]) {
+      sortedValid.push(...sortPeriod(periodGroup[p]));
+    }
+  });
+
+  const seenNames = new Set<string>();
+  const picked: ScoredItem[] = [];
+  for (const item of sortedValid) {
+    if (picked.length >= 4) break;
+    if (!seenNames.has(item.name)) {
+      seenNames.add(item.name);
+      picked.push(item);
+    }
   }
+
+  if (picked.length < 4 && pastItems.length > 0) {
+    const pastSeen = new Set(picked.map((p) => p.name));
+    for (const item of pastItems) {
+      if (picked.length >= 4) break;
+      if (!pastSeen.has(item.name)) {
+        pastSeen.add(item.name);
+        picked.push(item);
+      }
+    }
+  }
+
+  const distances = ['80m', '180m', '260m', '320m'];
+  const walkTimes = ['约2分钟', '约3分钟', '约4分钟', '约6分钟'];
+
+  const plan: PlanStop[] = picked.map((item, idx) => ({
+    id: item.id,
+    name: item.name,
+    category: item.category,
+    type: item.isShow ? 'show' : 'scenic',
+    waitTime: item.waitTime,
+    distance: distances[idx] || '150m',
+    walkTime: walkTimes[idx] || '约2分钟',
+    nextShowTime: item.showTime,
+    image: item.image,
+    reason: item.reason,
+    detailId: item.detailId,
+  }));
 
   return plan;
 };

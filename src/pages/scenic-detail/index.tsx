@@ -53,10 +53,12 @@ const ScenicDetailPage: React.FC = () => {
       id: `r_${Date.now()}`,
       targetId: spot.id,
       targetType: 'scenic',
+      targetName: spot.name,
       rating: reviewRating,
       content: reviewContent.trim(),
       date: dateStr,
       userName: '我',
+      mine: true,
     };
     addReview(newReview);
     setReviewContent('');

@@ -8,14 +8,40 @@ import { scenicSpots, facilities } from '@/data/scenic';
 
 type TabType = 'spot' | 'toilet' | 'medical';
 
-const facilityDistances: Record<string, string> = {
-  f001: '80m',
-  f002: '260m',
-  f003: '150m',
-  f004: '320m',
-  f005: '480m',
-  f006: '50m',
-  f007: '120m',
+interface SearchableItem {
+  id: string;
+  name: string;
+  type: string;
+  icon: string;
+  distance: string;
+  distanceMeters: number;
+  category: string;
+  leftPct: number;
+  topPct: number;
+}
+
+const facilityDistances: Record<string, { m: number; left: number; top: number }> = {
+  f001: { m: 80, left: 30, top: 40 },
+  f002: { m: 260, left: 70, top: 55 },
+  f003: { m: 150, left: 45, top: 70 },
+  f004: { m: 320, left: 80, top: 35 },
+  f005: { m: 480, left: 15, top: 80 },
+  f006: { m: 50, left: 55, top: 50 },
+  f007: { m: 120, left: 60, top: 25 },
+};
+
+const spotPositions: Record<string, { left: number; top: number; distance: number }> = {
+  s001: { left: 35, top: 35, distance: 120 },
+  s002: { left: 65, top: 45, distance: 200 },
+  s003: { left: 25, top: 65, distance: 180 },
+  s004: { left: 75, top: 70, distance: 300 },
+  s005: { left: 50, top: 30, distance: 90 },
+  s006: { left: 20, top: 45, distance: 150 },
+};
+
+const calcWalkTime = (meters: number) => {
+  const minutes = Math.max(1, Math.round(meters / 80));
+  return minutes < 60 ? `${minutes}分钟` : `${Math.floor(minutes / 60)}小时${minutes % 60}分`;
 };
 
 const MapPage: React.FC = () => {
@@ -23,6 +49,9 @@ const MapPage: React.FC = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [myLocation, setMyLocation] = useState('中心广场附近');
+  const [navTarget, setNavTarget] = useState<SearchableItem | null>(null);
+
+  const myPos = { leftPct: 50, topPct: 60 };
 
   const facilityTabs = [
     { id: 'spot' as TabType, name: '全部景点', icon: '🏛️' },
@@ -30,14 +59,36 @@ const MapPage: React.FC = () => {
     { id: 'medical' as TabType, name: '医务点', icon: '🏥' },
   ];
 
-  const allSearchable = useMemo(() => {
-    const items: Array<{ id: string; name: string; type: string; icon: string; distance: string; category: string }> = [];
+  const allSearchable = useMemo<SearchableItem[]>(() => {
+    const items: SearchableItem[] = [];
     scenicSpots.forEach((s) => {
-      items.push({ id: s.id, name: s.name, type: 'spot', icon: '🏯', distance: '—', category: s.category });
+      const pos = spotPositions[s.id] || { left: 50, top: 50, distance: 150 };
+      items.push({
+        id: s.id,
+        name: s.name,
+        type: 'spot',
+        icon: '🏯',
+        distance: `${pos.distance}m`,
+        distanceMeters: pos.distance,
+        category: s.category,
+        leftPct: pos.left,
+        topPct: pos.top,
+      });
     });
     facilities.forEach((f) => {
+      const info = facilityDistances[f.id] || { m: 150, left: 50, top: 50 };
       const iconMap: Record<string, string> = { toilet: '🚻', medical: '🏥', entrance: '🚪', exit: '🚪' };
-      items.push({ id: f.id, name: f.name, type: f.type, icon: iconMap[f.type] || '📍', distance: facilityDistances[f.id] || '—', category: f.type === 'toilet' ? '卫生间' : f.type === 'medical' ? '医务点' : '设施' });
+      items.push({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        icon: iconMap[f.type] || '📍',
+        distance: `${info.m}m`,
+        distanceMeters: info.m,
+        category: f.type === 'toilet' ? '卫生间' : f.type === 'medical' ? '医务点' : '设施',
+        leftPct: info.left,
+        topPct: info.top,
+      });
     });
     return items;
   }, []);
@@ -45,23 +96,35 @@ const MapPage: React.FC = () => {
   const searchResults = useMemo(() => {
     if (!searchKeyword.trim()) return [];
     const kw = searchKeyword.trim().toLowerCase();
-    return allSearchable.filter((item) => item.name.toLowerCase().includes(kw) || item.category.toLowerCase().includes(kw));
+    return allSearchable.filter(
+      (item) => item.name.toLowerCase().includes(kw) || item.category.toLowerCase().includes(kw)
+    );
   }, [searchKeyword, allSearchable]);
 
   const filteredFacilities = useMemo(() => {
-    return facilities.filter((f) => {
-      if (activeTab === 'spot') return true;
-      return f.type === activeTab;
-    }).map((f) => ({ ...f, distance: facilityDistances[f.id] || '—' }));
+    return facilities
+      .filter((f) => {
+        if (activeTab === 'spot') return true;
+        return f.type === activeTab;
+      })
+      .map((f) => {
+        const info = facilityDistances[f.id] || { m: 150, left: 50, top: 50 };
+        return { ...f, distance: `${info.m}m`, distanceMeters: info.m, walkTime: calcWalkTime(info.m) };
+      });
   }, [activeTab]);
 
   const getFacilityIcon = (type: string) => {
     switch (type) {
-      case 'toilet': return '🚻';
-      case 'medical': return '🏥';
-      case 'entrance': return '🚪';
-      case 'exit': return '🚪';
-      default: return '📍';
+      case 'toilet':
+        return '🚻';
+      case 'medical':
+        return '🏥';
+      case 'entrance':
+        return '🚪';
+      case 'exit':
+        return '🚪';
+      default:
+        return '📍';
     }
   };
 
@@ -76,20 +139,29 @@ const MapPage: React.FC = () => {
       success: (res) => {
         setMyLocation(`已定位 (${res.latitude.toFixed(4)}, ${res.longitude.toFixed(4)})`);
         Taro.showToast({ title: '定位成功', icon: 'success' });
-        console.log('[Map] 定位成功:', res.latitude, res.longitude);
       },
       fail: () => {
         setMyLocation('模拟定位：中心广场');
         Taro.showToast({ title: '使用模拟定位', icon: 'none' });
-        console.log('[Map] 定位失败，使用模拟位置');
       },
     });
   };
 
-  const handleNavigateTo = (name: string) => {
-    Taro.showToast({ title: `正在导航至${name}...`, icon: 'none' });
-    console.log('[Map] 导航至:', name);
+  const handleNavigateTo = (item: SearchableItem) => {
+    setNavTarget(item);
+    setShowSearch(false);
+    setSearchKeyword('');
+    Taro.showToast({ title: `导航至${item.name}`, icon: 'none' });
+    console.log('[Map] 开始导航到:', item.name);
   };
+
+  const handleCloseNav = () => {
+    setNavTarget(null);
+  };
+
+  const navLinePoints = navTarget
+    ? `${myPos.leftPct}% ${myPos.topPct}%, ${navTarget.leftPct}% ${navTarget.topPct}%`
+    : '';
 
   return (
     <View className={styles.container}>
@@ -105,7 +177,15 @@ const MapPage: React.FC = () => {
             onFocus={() => setShowSearch(true)}
           />
           {searchKeyword && (
-            <Text className={styles.searchClear} onClick={() => { setSearchKeyword(''); setShowSearch(false); }}>✕</Text>
+            <Text
+              className={styles.searchClear}
+              onClick={() => {
+                setSearchKeyword('');
+                setShowSearch(false);
+              }}
+            >
+              ✕
+            </Text>
           )}
         </View>
         <View className={styles.locationBtn} onClick={handleLocate}>
@@ -120,25 +200,34 @@ const MapPage: React.FC = () => {
           </View>
           {searchResults.length > 0 ? (
             searchResults.map((item) => (
-              <View key={item.id} className={styles.searchItem} onClick={() => {
-                setShowSearch(false);
-                setSearchKeyword('');
-                if (item.type === 'spot') {
-                  Taro.navigateTo({ url: `/pages/scenic-detail/index?id=${item.id}` });
-                } else {
-                  handleNavigateTo(item.name);
-                }
-              }}>
+              <View
+                key={item.id}
+                className={styles.searchItem}
+                onClick={() => {
+                  if (item.type === 'spot') {
+                    Taro.navigateTo({ url: `/pages/scenic-detail/index?id=${item.id}` });
+                  } else {
+                    handleNavigateTo(item);
+                  }
+                }}
+              >
                 <View className={styles.searchItemIcon}>
                   <Text>{item.icon}</Text>
                 </View>
                 <View className={styles.searchItemInfo}>
                   <Text className={styles.searchItemName}>{item.name}</Text>
-                  <Text className={styles.searchItemCat}>{item.category}</Text>
+                  <Text className={styles.searchItemCat}>
+                    {item.category} · 步行约{calcWalkTime(item.distanceMeters)}
+                  </Text>
                 </View>
                 <View className={styles.searchItemRight}>
-                  {item.distance !== '—' && <Text className={styles.searchItemDist}>{item.distance}</Text>}
-                  <Text className={styles.searchItemNav}>导航 →</Text>
+                  <Text className={styles.searchItemDist}>{item.distance}</Text>
+                  <View className={styles.goBtn} onClick={(e) => {
+                    e.stopPropagation();
+                    handleNavigateTo(item);
+                  }}>
+                    <Text>去这里</Text>
+                  </View>
                 </View>
               </View>
             ))
@@ -157,7 +246,9 @@ const MapPage: React.FC = () => {
                 className={classNames(styles.facilityTab, activeTab === tab.id && styles.active)}
                 onClick={() => setActiveTab(tab.id)}
               >
-                <Text>{tab.icon} {tab.name}</Text>
+                <Text>
+                  {tab.icon} {tab.name}
+                </Text>
               </View>
             ))}
           </View>
@@ -169,25 +260,73 @@ const MapPage: React.FC = () => {
               mode="aspectFill"
             />
             <View className={styles.mapMarkers}>
-              <View className={classNames(styles.marker, styles.markerCurrent)} style={{ left: '50%', top: '60%' }}>
+              <View
+                className={classNames(styles.marker, styles.markerCurrent)}
+                style={{ left: `${myPos.leftPct}%`, top: `${myPos.topPct}%` }}
+              >
                 <Text className={styles.markerIcon}>📍</Text>
                 <Text className={styles.markerLabel}>{myLocation}</Text>
               </View>
-              {scenicSpots.slice(0, 4).map((spot, idx) => (
+
+              {scenicSpots.slice(0, 4).map((spot, idx) => {
+                const pos = spotPositions[spot.id] || { left: 20 + idx * 20, top: 30 + (idx % 2) * 25 };
+                return (
+                  <View
+                    key={spot.id}
+                    className={classNames(
+                      styles.marker,
+                      navTarget?.id === spot.id && styles.markerTarget
+                    )}
+                    style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
+                  >
+                    <Text className={styles.markerIcon}>🏯</Text>
+                    <Text className={styles.markerLabel}>{spot.name}</Text>
+                  </View>
+                );
+              })}
+
+              {navTarget && (
                 <View
-                  key={spot.id}
-                  className={styles.marker}
-                  style={{
-                    left: `${20 + idx * 20}%`,
-                    top: `${30 + (idx % 2) * 25}%`,
-                  }}
+                  className={classNames(styles.marker, styles.markerTarget)}
+                  style={{ left: `${navTarget.leftPct}%`, top: `${navTarget.topPct}%` }}
                 >
-                  <Text className={styles.markerIcon}>🏯</Text>
-                  <Text className={styles.markerLabel}>{spot.name}</Text>
+                  <Text className={styles.markerIcon}>{navTarget.icon}</Text>
+                  <Text className={styles.markerLabel}>{navTarget.name}</Text>
                 </View>
-              ))}
+              )}
+
+              {navTarget && (
+                <svg className={styles.routeSvg} viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <line
+                    x1={myPos.leftPct}
+                    y1={myPos.topPct}
+                    x2={navTarget.leftPct}
+                    y2={navTarget.topPct}
+                    stroke="#C8102E"
+                    strokeWidth="0.8"
+                    strokeDasharray="2,1.5"
+                  />
+                </svg>
+              )}
             </View>
           </View>
+
+          {navTarget && (
+            <View className={styles.navPanel}>
+              <View className={styles.navInfo}>
+                <Text className={styles.navIcon}>{navTarget.icon}</Text>
+                <View className={styles.navText}>
+                  <Text className={styles.navName}>{navTarget.name}</Text>
+                  <Text className={styles.navMeta}>
+                    {navTarget.distance} · 步行约{calcWalkTime(navTarget.distanceMeters)}
+                  </Text>
+                </View>
+              </View>
+              <View className={styles.navClose} onClick={handleCloseNav}>
+                <Text>✕</Text>
+              </View>
+            </View>
+          )}
 
           <ScrollView scrollY className={styles.contentSection}>
             <View className={styles.sectionHeader}>
@@ -207,18 +346,32 @@ const MapPage: React.FC = () => {
               </View>
             ) : (
               <View className={styles.facilityList}>
-                {filteredFacilities.map((f) => (
-                  <View key={f.id} className={styles.facilityItem} onClick={() => handleNavigateTo(f.name)}>
-                    <View className={styles.facilityIcon}>
-                      <Text>{getFacilityIcon(f.type)}</Text>
+                {filteredFacilities.map((f) => {
+                  const pos = facilityDistances[f.id] || { m: 150, left: 50, top: 50 };
+                  const searchItem = allSearchable.find((s) => s.id === f.id);
+                  return (
+                    <View
+                      key={f.id}
+                      className={styles.facilityItem}
+                      onClick={() => {
+                        if (searchItem) handleNavigateTo(searchItem);
+                      }}
+                    >
+                      <View className={styles.facilityIcon}>
+                        <Text>{getFacilityIcon(f.type)}</Text>
+                      </View>
+                      <View className={styles.facilityInfo}>
+                        <Text className={styles.facilityName}>{f.name}</Text>
+                        <Text className={styles.facilityDesc}>
+                          距离 {f.distance} · 步行约{f.walkTime}
+                        </Text>
+                      </View>
+                      <View className={styles.goBtn}>
+                        <Text>去这里</Text>
+                      </View>
                     </View>
-                    <View className={styles.facilityInfo}>
-                      <Text className={styles.facilityName}>{f.name}</Text>
-                      <Text className={styles.facilityDesc}>距离约 {f.distance}</Text>
-                    </View>
-                    <Text className={styles.facilityDistance}>导航 →</Text>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             )}
           </ScrollView>

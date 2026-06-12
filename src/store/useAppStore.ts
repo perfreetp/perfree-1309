@@ -1,28 +1,24 @@
 import { create } from 'zustand';
-import { Review, LostItem } from '@/types';
-
-export interface TicketInfo {
-  type: string;
-  price: number;
-  validDate: string;
-  code: string;
-  bound: boolean;
-}
+import { Review, LostItem, SingleTicket } from '@/types';
 
 interface AppState {
   favorites: string[];
   parkingRecord: { area: string; spotNumber: string; enterTime: string } | null;
   squadMembers: Array<{ id: string; name: string; avatar: string; isOnline: boolean }>;
-  ticket: TicketInfo | null;
+  tickets: SingleTicket[];
   claimedCoupons: string[];
   reviews: Review[];
   lostItems: LostItem[];
   toggleFavorite: (id: string) => void;
   setParkingRecord: (record: { area: string; spotNumber: string; enterTime: string } | null) => void;
-  setTicket: (ticket: TicketInfo | null) => void;
+  addTickets: (tickets: SingleTicket[]) => void;
+  removeTicket: (ticketId: string) => void;
+  clearTickets: () => void;
   claimCoupon: (couponId: string) => void;
   addReview: (review: Review) => void;
+  removeReview: (reviewId: string) => void;
   addLostItem: (item: LostItem) => void;
+  removeLostItem: (itemId: string) => void;
 }
 
 const loadFromStorage = <T>(key: string, fallback: T): T => {
@@ -52,8 +48,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     { id: '1', name: '我', avatar: '', isOnline: true },
     { id: '2', name: '小明', avatar: '', isOnline: true },
     { id: '3', name: '小红', avatar: '', isOnline: false },
+    { id: '4', name: '爸爸', avatar: '', isOnline: true },
+    { id: '5', name: '妈妈', avatar: '', isOnline: false },
   ],
-  ticket: loadFromStorage<TicketInfo | null>('wss_ticket', null),
+  tickets: loadFromStorage<SingleTicket[]>('wss_tickets', []),
   claimedCoupons: loadFromStorage<string[]>('wss_coupons', []),
   reviews: loadFromStorage<Review[]>('wss_reviews', []),
   lostItems: loadFromStorage<LostItem[]>('wss_lostItems', []),
@@ -70,9 +68,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ parkingRecord: record });
   },
 
-  setTicket: (ticket) => {
-    persist('wss_ticket', ticket);
-    set({ ticket });
+  addTickets: (newTickets) => {
+    const next = [...get().tickets, ...newTickets];
+    persist('wss_tickets', next);
+    set({ tickets: next });
+  },
+
+  removeTicket: (ticketId) => {
+    const next = get().tickets.filter((t) => t.id !== ticketId);
+    persist('wss_tickets', next);
+    set({ tickets: next });
+  },
+
+  clearTickets: () => {
+    persist('wss_tickets', []);
+    set({ tickets: [] });
   },
 
   claimCoupon: (couponId) => {
@@ -89,8 +99,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ reviews: next });
   },
 
+  removeReview: (reviewId) => {
+    const next = get().reviews.filter((r) => r.id !== reviewId);
+    persist('wss_reviews', next);
+    set({ reviews: next });
+  },
+
   addLostItem: (item) => {
     const next = [item, ...get().lostItems];
+    persist('wss_lostItems', next);
+    set({ lostItems: next });
+  },
+
+  removeLostItem: (itemId) => {
+    const next = get().lostItems.filter((l) => l.id !== itemId);
     persist('wss_lostItems', next);
     set({ lostItems: next });
   },

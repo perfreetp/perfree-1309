@@ -77,6 +77,91 @@
   z-index: 2;
 }
 
+.statsCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.statsTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-around;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statNum {
+  font-size: 36rpx;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.tabBar {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xs;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  gap: $spacing-xs;
+}
+
+.tabItem {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-sm 0;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &.active {
+    background: $gradient-primary;
+    color: $color-text-white;
+  }
+}
+
+.ticketSection {
+  margin-bottom: $spacing-md;
+}
+
+.sectionActionBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+  padding: 0 $spacing-xs;
+}
+
+.sectionActionBarTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionActionBarText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
 .ticketCard {
   background: $color-bg-card;
   border-radius: $radius-lg;
@@ -109,6 +194,30 @@
   margin-bottom: $spacing-md;
 }
 
+.ticketHolderInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.ticketHolderAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  background: $color-bg-tag;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+
+.ticketHolderName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+}
+
 .ticketTitle {
   font-size: $font-size-lg;
   font-weight: $font-weight-semibold;
@@ -116,9 +225,18 @@
 }
 
 .ticketStatus {
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
   color: $color-success;
   font-weight: $font-weight-medium;
+}
+
+.ticketType {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba(200, 16, 46, 0.08);
+  border-radius: $radius-sm;
 }
 
 .ticketInfo {
@@ -161,12 +279,6 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
-}
-
-.ticketType {
-  font-size: $font-size-md;
-  font-weight: $font-weight-medium;
-  color: $color-text-primary;
 }
 
 .ticketTime {
@@ -276,6 +388,194 @@
   color: $color-text-tertiary;
 }
 
+.addTicketRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-sm;
+}
+
+.addTicketBtn {
+  flex: 1;
+  height: 80rpx;
+  background: $color-bg-card;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.addTicketBtnPrimary {
+  flex: 1;
+  height: 80rpx;
+  background: $gradient-primary;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.listSection {
+  margin-bottom: $spacing-md;
+}
+
+.emptyHint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-xl 0;
+  gap: $spacing-sm;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.recordList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.recordCard {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.recordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+.recordTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.recordDelete {
+  font-size: $font-size-xs;
+  color: $color-error;
+  padding: 4rpx 16rpx;
+  background: rgba(200, 16, 46, 0.08);
+  border-radius: $radius-sm;
+}
+
+.recordStars {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  margin-bottom: $spacing-xs;
+  font-size: 24rpx;
+}
+
+.recordDate {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+}
+
+.recordStatus {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
+.recordContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.recordMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $spacing-sm;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.couponCard {
+  display: flex;
+  align-items: stretch;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.couponAmount {
+  width: 180rpx;
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE4C4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+}
+
+.couponInfo {
+  flex: 1;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.couponShop {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.couponCondition {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.couponExpire {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.couponUsed {
+  width: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  color: $color-success;
+  font-weight: $font-weight-medium;
+  background: rgba(46, 204, 113, 0.08);
+}
+
 .buyModal {
   position: fixed;
   top: 0;
@@ -290,10 +590,12 @@
 
 .buyContent {
   width: 100%;
+  max-height: 85vh;
   background: $color-bg-card;
   border-radius: $radius-xl $radius-xl 0 0;
-  padding: $spacing-xl $page-padding;
+  padding: $spacing-lg $page-padding;
   padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
+  overflow-y: auto;
 }
 
 .buyTitle {
@@ -304,16 +606,25 @@
   text-align: center;
 }
 
-.buyItem {
+.buyTypeList {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.buyTypeItem {
+  display: flex;
   align-items: center;
   padding: $spacing-md;
-  border-bottom: 1rpx solid $color-divider;
-  transition: background $transition-fast;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  position: relative;
+  transition: all $transition-base;
 
-  &:active {
-    background: $color-bg-hover;
+  &.selected {
+    border-color: $color-primary;
+    background: rgba(200, 16, 46, 0.04);
   }
 }
 
@@ -321,6 +632,7 @@
   display: flex;
   flex-direction: column;
   gap: 4rpx;
+  flex: 1;
 }
 
 .buyType {
@@ -330,7 +642,7 @@
 }
 
 .buyDesc {
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
   color: $color-text-tertiary;
 }
 
@@ -338,14 +650,175 @@
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
   color: $color-error;
+  margin-right: $spacing-sm;
 }
 
-.buyClose {
-  margin-top: $spacing-lg;
-  text-align: center;
-  padding: $spacing-md;
+.checkMark {
+  position: absolute;
+  right: $spacing-sm;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $color-primary;
+  font-weight: $font-weight-bold;
   font-size: $font-size-md;
+}
+
+.buyCountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-top: 1rpx solid $color-divider;
+  border-bottom: 1rpx solid $color-divider;
+  margin-bottom: $spacing-md;
+}
+
+.buyCountLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.buyCountControl {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.countBtn {
+  width: 56rpx;
+  height: 56rpx;
+  background: $color-bg-page;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.countNum {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.buyHolderTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.holderGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.holderSelect {
+  padding: $spacing-sm;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.holderIdx {
+  font-size: $font-size-xs;
   color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.holderChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.holderChip {
+  padding: $spacing-xs $spacing-sm;
+  background: $color-bg-card;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+
+  &.holderChipSelected {
+    background: $color-primary;
+    color: $color-text-white;
+    border-color: $color-primary;
+  }
+}
+
+.buyTotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: $spacing-xs;
+  padding: $spacing-md 0;
+  margin-bottom: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.buyTotalLabel {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.buyTotalPrice {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+}
+
+.buyActions {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.buyCancelBtn {
+  flex: 1;
+  height: 88rpx;
+  background: $color-bg-page;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.buyConfirmBtn {
+  flex: 1;
+  height: 88rpx;
+  background: $gradient-primary;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
 }
 
 .menuCard {
@@ -395,40 +868,4 @@
   padding: 2rpx 12rpx;
   border-radius: $radius-round;
   margin-right: $spacing-sm;
-}
-
-.statsCard {
-  background: $color-bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-lg;
-  box-shadow: $shadow-card;
-  margin-bottom: $spacing-md;
-}
-
-.statsTitle {
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  margin-bottom: $spacing-md;
-}
-
-.statsRow {
-  display: flex;
-  justify-content: space-around;
-}
-
-.statItem {
-  text-align: center;
-}
-
-.statNum {
-  font-size: 36rpx;
-  font-weight: $font-weight-bold;
-  color: $color-primary;
-}
-
-.statLabel {
-  font-size: $font-size-sm;
-  color: $color-text-tertiary;
-  margin-top: 4rpx;
 }

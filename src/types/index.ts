@@ -102,6 +102,18 @@ export interface Review {
   images?: string[];
   date: string;
   userName?: string;
+  mine?: boolean;
+}
+
+export interface SingleTicket {
+  id: string;
+  type: string;
+  price: number;
+  validDate: string;
+  code: string;
+  bound: boolean;
+  holderName: string;
+  holderAvatar?: string;
 }
 
 export interface RoutePlan {

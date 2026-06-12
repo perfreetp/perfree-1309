@@ -138,4 +138,202 @@
   border-radius: $radius-button;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.planSection {
+  margin: 0 $page-padding $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.planHeader {
+  margin-bottom: $spacing-md;
+}
+
+.planTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+}
+
+.planSubtitle {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.planTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.planStop {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.planStopLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 56rpx;
+  flex-shrink: 0;
+}
+
+.planStopNumber {
+  width: 56rpx;
+  height: 56rpx;
+  background: $gradient-primary;
+  color: $color-text-white;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+
+  &.last {
+    background: $color-gold;
+  }
+}
+
+.planConnector {
+  width: 4rpx;
+  flex: 1;
+  background: $color-border;
+  min-height: 40rpx;
+}
+
+.planStopCard {
+  flex: 1;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-sm;
+}
+
+.planStopHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-xs;
+}
+
+.planStopName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.planStopTags {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.planStopCategory {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: rgba(200, 16, 46, 0.08);
+  padding: 2rpx 12rpx;
+  border-radius: $radius-sm;
+}
+
+.planStopShow {
+  font-size: $font-size-xs;
+  color: $color-gold;
+  background: rgba(212, 168, 75, 0.12);
+  padding: 2rpx 12rpx;
+  border-radius: $radius-sm;
+}
+
+.planWaitBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80rpx;
+  padding: $spacing-xs $spacing-sm;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: $color-text-white;
+  border-radius: $radius-sm;
+}
+
+.planWaitNum {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}
+
+.planWaitUnit {
+  font-size: 20rpx;
+  opacity: 0.9;
+}
+
+.planReason {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin: $spacing-xs 0;
+  line-height: 1.5;
+}
+
+.planMeta {
+  display: flex;
+  gap: $spacing-md;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+}
+
+.planActions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.planActionBtn {
+  flex: 1;
+  height: 64rpx;
+  background: $color-bg-card;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.planActionBtnPrimary {
+  flex: 1;
+  height: 64rpx;
+  background: $gradient-primary;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
 }

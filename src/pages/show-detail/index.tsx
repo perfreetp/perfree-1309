@@ -74,10 +74,12 @@ const ShowDetailPage: React.FC = () => {
       id: `r_${Date.now()}`,
       targetId: show.id,
       targetType: 'show',
+      targetName: show.name,
       rating: reviewRating,
       content: reviewContent.trim(),
       date: dateStr,
       userName: '我',
+      mine: true,
     };
     addReview(newReview);
     setReviewContent('');

@@ -10,6 +10,7 @@ export default defineAppConfig({
     'pages/scenic-detail/index',
     'pages/show-detail/index',
     'pages/squad/index',
+    'pages/itinerary/index',
   ],
   window: {
     backgroundTextStyle: 'light',

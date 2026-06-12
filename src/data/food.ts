@@ -11,6 +11,7 @@ export const foodShops: FoodShop[] = [
     distance: '150m',
     hasCoupon: true,
     couponText: '满100减20',
+    couponIds: ['c001'],
     location: '水浒文化街12号',
   },
   {
@@ -23,6 +24,7 @@ export const foodShops: FoodShop[] = [
     distance: '300m',
     hasCoupon: true,
     couponText: '8.8折优惠',
+    couponIds: ['c002'],
     location: '清明上河园旁',
   },
   {
@@ -34,6 +36,7 @@ export const foodShops: FoodShop[] = [
     description: '汇聚各地特色小吃，品种丰富，价格实惠。',
     distance: '200m',
     hasCoupon: false,
+    couponIds: [],
     location: '景区中心广场',
   },
   {
@@ -46,6 +49,7 @@ export const foodShops: FoodShop[] = [
     distance: '450m',
     hasCoupon: true,
     couponText: '满200减50',
+    couponIds: ['c003'],
     location: '西门美食街',
   },
   {
@@ -58,6 +62,7 @@ export const foodShops: FoodShop[] = [
     distance: '100m',
     hasCoupon: true,
     couponText: '新品9折',
+    couponIds: ['c004'],
     location: '水浒文化街8号',
   },
   {
@@ -69,6 +74,7 @@ export const foodShops: FoodShop[] = [
     description: '仿宋代官窑瓷器，精美绝伦，收藏佳品。',
     distance: '250m',
     hasCoupon: false,
+    couponIds: [],
     location: '清明上河图景区内',
   },
   {
@@ -81,6 +87,7 @@ export const foodShops: FoodShop[] = [
     distance: '180m',
     hasCoupon: true,
     couponText: '满50减10',
+    couponIds: ['c005'],
     location: '武侠城入口处',
   },
 ];

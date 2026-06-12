@@ -5,7 +5,7 @@ import styles from './index.module.scss';
 import classNames from 'classnames';
 import { shows } from '@/data/shows';
 import { useAppStore } from '@/store/useAppStore';
-import { Review } from '@/types';
+import { Review, ItineraryItem } from '@/types';
 
 const defaultReviews = [
   { id: '1', name: '戏剧爱好者', rating: 5, content: '太震撼了！舞美和灯光效果一流，演员表演非常专业，强烈推荐！', date: '2026-06-10' },
@@ -14,12 +14,14 @@ const defaultReviews = [
 
 const ShowDetailPage: React.FC = () => {
   const router = useRouter();
-  const { favorites, toggleFavorite, reviews, addReview } = useAppStore();
+  const { favorites, toggleFavorite, reviews, addReview, addItineraryItem, itinerary } = useAppStore();
   const [show, setShow] = useState(shows[0]);
   const [reminders, setReminders] = useState<string[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewContent, setReviewContent] = useState('');
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planTime, setPlanTime] = useState('10:00');
 
   useEffect(() => {
     const id = router.params.id;
@@ -61,6 +63,40 @@ const ShowDetailPage: React.FC = () => {
 
   const handleBuyTicket = () => {
     Taro.showToast({ title: '购票功能开发中', icon: 'none' });
+  };
+
+  const inItinerary = useMemo(() => {
+    return itinerary.some((i) => i.targetId === show.id && i.type === 'show');
+  }, [itinerary, show.id]);
+
+  const handleAddItinerary = () => {
+    if (inItinerary) {
+      Taro.showToast({ title: '已在行程中', icon: 'none' });
+      return;
+    }
+    if (show.times.length > 0) {
+      setPlanTime(show.times[0]);
+    }
+    setShowPlanModal(true);
+  };
+
+  const handleConfirmPlan = () => {
+    const newItem: ItineraryItem = {
+      id: `it_${Date.now()}`,
+      type: 'show',
+      targetId: show.id,
+      name: show.name,
+      image: show.image,
+      plannedTime: planTime,
+      duration: show.duration,
+      showTime: planTime,
+      walkTime: '约3分钟',
+      waitTime: 15,
+      memberIds: ['1'],
+    };
+    addItineraryItem(newItem);
+    setShowPlanModal(false);
+    Taro.showToast({ title: '已加入行程', icon: 'success' });
   };
 
   const handleSubmitReview = () => {
@@ -225,6 +261,12 @@ const ShowDetailPage: React.FC = () => {
           <Text>{isFavorite ? '❤️' : '🤍'}</Text>
         </View>
         <View
+          className={`${styles.bottomBtn} ${styles.btnPlan} ${inItinerary ? styles.btnPlanActive : ''}`}
+          onClick={handleAddItinerary}
+        >
+          <Text>{inItinerary ? '✓ 已加行程' : '📅 加行程'}</Text>
+        </View>
+        <View
           className={`${styles.bottomBtn} ${styles.btnReview}`}
           onClick={() => setShowReviewForm(true)}
         >
@@ -234,6 +276,51 @@ const ShowDetailPage: React.FC = () => {
           <Text>🎫 预订</Text>
         </View>
       </View>
+
+      {showPlanModal && (
+        <View className={styles.modalMask} onClick={() => setShowPlanModal(false)}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>加入今日行程</Text>
+            <Text className={styles.modalSub}>{show.name}</Text>
+
+            <View className={styles.modalSection}>
+              <Text className={styles.modalLabel}>选择场次</Text>
+              <View className={styles.timeChips}>
+                {show.times.map((t) => (
+                  <View
+                    key={t}
+                    className={`${styles.timeChip} ${planTime === t ? styles.timeChipActive : ''}`}
+                    onClick={() => setPlanTime(t)}
+                  >
+                    <Text>{t}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View className={styles.modalRow}>
+              <Text className={styles.modalLabel}>演出时长</Text>
+              <Text className={styles.modalValue}>{show.duration}分钟</Text>
+            </View>
+            <View className={styles.modalRow}>
+              <Text className={styles.modalLabel}>演出地点</Text>
+              <Text className={styles.modalValue}>{show.venue}</Text>
+            </View>
+
+            <View className={styles.modalActions}>
+              <View
+                className={styles.modalCancelBtn}
+                onClick={() => setShowPlanModal(false)}
+              >
+                <Text>取消</Text>
+              </View>
+              <View className={styles.modalConfirmBtn} onClick={handleConfirmPlan}>
+                <Text>确认加入</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

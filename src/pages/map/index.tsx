@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Image, Input, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classNames from 'classnames';
 import ScenicCard from '@/components/ScenicCard';
 import { scenicSpots, facilities } from '@/data/scenic';
+import { useAppStore } from '@/store/useAppStore';
+import { NavTarget } from '@/types';
 
 type TabType = 'spot' | 'toilet' | 'medical';
 
@@ -31,12 +33,12 @@ const facilityDistances: Record<string, { m: number; left: number; top: number }
 };
 
 const spotPositions: Record<string, { left: number; top: number; distance: number }> = {
-  s001: { left: 35, top: 35, distance: 120 },
-  s002: { left: 65, top: 45, distance: 200 },
-  s003: { left: 25, top: 65, distance: 180 },
-  s004: { left: 75, top: 70, distance: 300 },
-  s005: { left: 50, top: 30, distance: 90 },
-  s006: { left: 20, top: 45, distance: 150 },
+  s001: { left: 25, top: 30, distance: 120 },
+  s002: { left: 70, top: 25, distance: 200 },
+  s003: { left: 20, top: 70, distance: 180 },
+  s004: { left: 75, top: 65, distance: 300 },
+  s005: { left: 50, top: 45, distance: 90 },
+  s006: { left: 35, top: 55, distance: 150 },
 };
 
 const calcWalkTime = (meters: number) => {
@@ -45,11 +47,11 @@ const calcWalkTime = (meters: number) => {
 };
 
 const MapPage: React.FC = () => {
+  const { navTarget, setNavTarget } = useAppStore();
   const [activeTab, setActiveTab] = useState<TabType>('spot');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [myLocation, setMyLocation] = useState('中心广场附近');
-  const [navTarget, setNavTarget] = useState<SearchableItem | null>(null);
 
   const myPos = { leftPct: 50, topPct: 60 };
 
@@ -109,7 +111,7 @@ const MapPage: React.FC = () => {
       })
       .map((f) => {
         const info = facilityDistances[f.id] || { m: 150, left: 50, top: 50 };
-        return { ...f, distance: `${info.m}m`, distanceMeters: info.m, walkTime: calcWalkTime(info.m) };
+        return { ...f, distance: `${info.m}m`, distanceMeters: info.m, walkTime: calcWalkTime(info.m), leftPct: info.left, topPct: info.top };
       });
   }, [activeTab]);
 
@@ -148,16 +150,45 @@ const MapPage: React.FC = () => {
   };
 
   const handleNavigateTo = (item: SearchableItem) => {
-    setNavTarget(item);
+    const target: NavTarget = {
+      id: item.id,
+      name: item.name,
+      icon: item.icon,
+      type: item.type,
+      distanceMeters: item.distanceMeters,
+      leftPct: item.leftPct,
+      topPct: item.topPct,
+    };
+    setNavTarget(target);
     setShowSearch(false);
     setSearchKeyword('');
     Taro.showToast({ title: `导航至${item.name}`, icon: 'none' });
     console.log('[Map] 开始导航到:', item.name);
   };
 
+  const handleNavigateFacility = (f: any) => {
+    const target: NavTarget = {
+      id: f.id,
+      name: f.name,
+      icon: getFacilityIcon(f.type),
+      type: f.type,
+      distanceMeters: f.distanceMeters,
+      leftPct: f.leftPct,
+      topPct: f.topPct,
+    };
+    setNavTarget(target);
+    Taro.showToast({ title: `导航至${f.name}`, icon: 'none' });
+  };
+
   const handleCloseNav = () => {
     setNavTarget(null);
   };
+
+  useDidShow(() => {
+    if (navTarget) {
+      console.log('[Map] 恢复导航目标:', navTarget.name);
+    }
+  });
 
   const navLinePoints = navTarget
     ? `${myPos.leftPct}% ${myPos.topPct}%, ${navTarget.leftPct}% ${navTarget.topPct}%`
@@ -222,10 +253,13 @@ const MapPage: React.FC = () => {
                 </View>
                 <View className={styles.searchItemRight}>
                   <Text className={styles.searchItemDist}>{item.distance}</Text>
-                  <View className={styles.goBtn} onClick={(e) => {
-                    e.stopPropagation();
-                    handleNavigateTo(item);
-                  }}>
+                  <View
+                    className={styles.goBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateTo(item);
+                    }}
+                  >
                     <Text>去这里</Text>
                   </View>
                 </View>
@@ -268,16 +302,17 @@ const MapPage: React.FC = () => {
                 <Text className={styles.markerLabel}>{myLocation}</Text>
               </View>
 
-              {scenicSpots.slice(0, 4).map((spot, idx) => {
-                const pos = spotPositions[spot.id] || { left: 20 + idx * 20, top: 30 + (idx % 2) * 25 };
+              {scenicSpots.map((spot) => {
+                const pos = spotPositions[spot.id] || { left: 50, top: 50, distance: 150 };
+                const isTarget = navTarget?.id === spot.id;
                 return (
                   <View
                     key={spot.id}
-                    className={classNames(
-                      styles.marker,
-                      navTarget?.id === spot.id && styles.markerTarget
-                    )}
+                    className={classNames(styles.marker, isTarget && styles.markerTarget)}
                     style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
+                    onClick={() => {
+                      Taro.navigateTo({ url: `/pages/scenic-detail/index?id=${spot.id}` });
+                    }}
                   >
                     <Text className={styles.markerIcon}>🏯</Text>
                     <Text className={styles.markerLabel}>{spot.name}</Text>
@@ -285,7 +320,7 @@ const MapPage: React.FC = () => {
                 );
               })}
 
-              {navTarget && (
+              {navTarget && navTarget.type !== 'spot' && (
                 <View
                   className={classNames(styles.marker, styles.markerTarget)}
                   style={{ left: `${navTarget.leftPct}%`, top: `${navTarget.topPct}%` }}
@@ -318,7 +353,7 @@ const MapPage: React.FC = () => {
                 <View className={styles.navText}>
                   <Text className={styles.navName}>{navTarget.name}</Text>
                   <Text className={styles.navMeta}>
-                    {navTarget.distance} · 步行约{calcWalkTime(navTarget.distanceMeters)}
+                    {navTarget.distanceMeters}m · 步行约{calcWalkTime(navTarget.distanceMeters)}
                   </Text>
                 </View>
               </View>
@@ -347,16 +382,8 @@ const MapPage: React.FC = () => {
             ) : (
               <View className={styles.facilityList}>
                 {filteredFacilities.map((f) => {
-                  const pos = facilityDistances[f.id] || { m: 150, left: 50, top: 50 };
-                  const searchItem = allSearchable.find((s) => s.id === f.id);
                   return (
-                    <View
-                      key={f.id}
-                      className={styles.facilityItem}
-                      onClick={() => {
-                        if (searchItem) handleNavigateTo(searchItem);
-                      }}
-                    >
+                    <View key={f.id} className={styles.facilityItem}>
                       <View className={styles.facilityIcon}>
                         <Text>{getFacilityIcon(f.type)}</Text>
                       </View>
@@ -366,7 +393,10 @@ const MapPage: React.FC = () => {
                           距离 {f.distance} · 步行约{f.walkTime}
                         </Text>
                       </View>
-                      <View className={styles.goBtn}>
+                      <View
+                        className={styles.goBtn}
+                        onClick={() => handleNavigateFacility(f)}
+                      >
                         <Text>去这里</Text>
                       </View>
                     </View>

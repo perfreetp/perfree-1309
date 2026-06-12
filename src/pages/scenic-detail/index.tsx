@@ -4,7 +4,7 @@ import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { scenicSpots } from '@/data/scenic';
 import { useAppStore } from '@/store/useAppStore';
-import { Review } from '@/types';
+import { Review, ItineraryItem } from '@/types';
 import classNames from 'classnames';
 
 const defaultReviews = [
@@ -15,10 +15,12 @@ const defaultReviews = [
 const ScenicDetailPage: React.FC = () => {
   const router = useRouter();
   const [spot, setSpot] = useState(scenicSpots[0]);
-  const { reviews, addReview } = useAppStore();
+  const { reviews, addReview, addItineraryItem, itinerary } = useAppStore();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewContent, setReviewContent] = useState('');
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planTime, setPlanTime] = useState('10:00');
 
   useEffect(() => {
     const id = router.params.id;
@@ -40,6 +42,36 @@ const ScenicDetailPage: React.FC = () => {
   const handleNavigate = () => {
     console.log('[ScenicDetail] 导航');
     Taro.showToast({ title: '正在打开地图导航...', icon: 'none' });
+  };
+
+  const inItinerary = useMemo(() => {
+    return itinerary.some((i) => i.targetId === spot.id && i.type === 'scenic');
+  }, [itinerary, spot.id]);
+
+  const handleAddItinerary = () => {
+    if (inItinerary) {
+      Taro.showToast({ title: '已在行程中', icon: 'none' });
+      return;
+    }
+    setShowPlanModal(true);
+  };
+
+  const handleConfirmPlan = () => {
+    const duration = parseInt(spot.duration.replace(/[^0-9]/g, ''), 10) || 60;
+    const newItem: ItineraryItem = {
+      id: `it_${Date.now()}`,
+      type: 'scenic',
+      targetId: spot.id,
+      name: spot.name,
+      image: spot.image,
+      plannedTime: planTime,
+      duration,
+      walkTime: '约5分钟',
+      memberIds: ['1'],
+    };
+    addItineraryItem(newItem);
+    setShowPlanModal(false);
+    Taro.showToast({ title: '已加入行程', icon: 'success' });
   };
 
   const handleSubmitReview = () => {
@@ -193,12 +225,59 @@ const ScenicDetailPage: React.FC = () => {
           <Text>📝 写评价</Text>
         </View>
         <View
+          className={`${styles.bottomBtn} ${styles.btnPlan} ${inItinerary ? styles.btnPlanActive : ''}`}
+          onClick={handleAddItinerary}
+        >
+          <Text>{inItinerary ? '✅ 已加入' : '📅 加入行程'}</Text>
+        </View>
+        <View
           className={`${styles.bottomBtn} ${styles.btnPrimary}`}
           onClick={handleNavigate}
         >
           <Text>🧭 导航前往</Text>
         </View>
       </View>
+
+      {showPlanModal && (
+        <View className={styles.modalMask} onClick={() => setShowPlanModal(false)}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>加入今日行程</Text>
+            <Text className={styles.modalSub}>{spot.name}</Text>
+
+            <View className={styles.modalSection}>
+              <Text className={styles.modalLabel}>计划到达时间</Text>
+              <View className={styles.timeChips}>
+                {['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '19:00', '20:00'].map((t) => (
+                  <View
+                    key={t}
+                    className={`${styles.timeChip} ${planTime === t ? styles.timeChipActive : ''}`}
+                    onClick={() => setPlanTime(t)}
+                  >
+                    <Text>{t}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View className={styles.modalRow}>
+              <Text className={styles.modalLabel}>建议游玩时长</Text>
+              <Text className={styles.modalValue}>{spot.duration}</Text>
+            </View>
+
+            <View className={styles.modalActions}>
+              <View
+                className={styles.modalCancelBtn}
+                onClick={() => setShowPlanModal(false)}
+              >
+                <Text>取消</Text>
+              </View>
+              <View className={styles.modalConfirmBtn} onClick={handleConfirmPlan}>
+                <Text>确认加入</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

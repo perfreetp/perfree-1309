@@ -294,3 +294,176 @@
     background: $color-bg-hover;
   }
 }
+
+.detailPage {
+  min-height: 100vh;
+  background: $color-bg-page;
+  position: relative;
+}
+
+.detailScroll {
+  height: 100vh;
+}
+
+.detailBottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 16rpx 32rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 16rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  z-index: 100;
+}
+
+.detailBottomBtn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.btnSecondary {
+  background: #f7f8fa;
+  color: #4e5969;
+  border: 1rpx solid #e5e6eb;
+}
+
+.btnPlan {
+  background: #fff0f0;
+  color: #C8102E;
+  border: 2rpx solid #C8102E;
+}
+
+.btnPlanActive {
+  background: #C8102E;
+  color: #fff;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #C8102E 0%, #ff6b6b 100%);
+  color: #fff;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalContent {
+  width: 100%;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx 32rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+}
+
+.modalTitle {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1d2129;
+  text-align: center;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.modalSub {
+  font-size: 26rpx;
+  color: #86909c;
+  text-align: center;
+  display: block;
+  margin-bottom: 32rpx;
+}
+
+.modalSection {
+  margin-bottom: 24rpx;
+}
+
+.modalLabel {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1d2129;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.timeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.timeChip {
+  padding: 16rpx 32rpx;
+  background: #f7f8fa;
+  border: 2rpx solid #e5e6eb;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #4e5969;
+}
+
+.timeChipActive {
+  background: linear-gradient(135deg, #C8102E 0%, #ff6b6b 100%);
+  border-color: #C8102E;
+  color: #fff;
+  font-weight: 500;
+}
+
+.modalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-top: 2rpx solid #f2f3f5;
+}
+
+.modalValue {
+  font-size: 28rpx;
+  color: #4e5969;
+}
+
+.modalActions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 32rpx;
+}
+
+.modalCancelBtn {
+  flex: 1;
+  height: 88rpx;
+  background: #f7f8fa;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #4e5969;
+}
+
+.modalConfirmBtn {
+  flex: 2;
+  height: 88rpx;
+  background: linear-gradient(135deg, #C8102E 0%, #ff6b6b 100%);
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+}

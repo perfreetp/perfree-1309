@@ -207,26 +207,39 @@
 }
 
 .btnFavorite {
-  width: 120rpx;
+  width: 100rpx;
   flex-shrink: 0;
   background: $color-bg-page;
   border: 1rpx solid $color-border;
   font-size: 32rpx;
 }
 
+.btnPlan {
+  flex: 1;
+  background: $color-bg-tag;
+  color: $color-primary;
+  border: 2rpx solid $color-primary;
+  font-size: 26rpx;
+}
+
+.btnPlanActive {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
 .btnReview {
-  width: 160rpx;
+  width: 120rpx;
   flex-shrink: 0;
   background: $color-bg-page;
   border: 1rpx solid $color-border;
   color: $color-text-primary;
-  font-size: $font-size-sm;
+  font-size: 24rpx;
 }
 
 .btnPrimary {
+  flex: 1;
   background: $gradient-primary;
   color: $color-text-white;
-  flex: 1;
 }
 
 .reviewCount {
@@ -327,4 +340,120 @@
     opacity: 0.9;
     transform: scale(0.98);
   }
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalContent {
+  width: 100%;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx 32rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+}
+
+.modalTitle {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1d2129;
+  text-align: center;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.modalSub {
+  font-size: 26rpx;
+  color: #86909c;
+  text-align: center;
+  display: block;
+  margin-bottom: 32rpx;
+}
+
+.modalSection {
+  margin-bottom: 24rpx;
+}
+
+.modalLabel {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1d2129;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.timeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.timeChip {
+  padding: 16rpx 32rpx;
+  background: #f7f8fa;
+  border: 2rpx solid #e5e6eb;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #4e5969;
+}
+
+.timeChipActive {
+  background: linear-gradient(135deg, #C8102E 0%, #ff6b6b 100%);
+  border-color: #C8102E;
+  color: #fff;
+  font-weight: 500;
+}
+
+.modalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-top: 2rpx solid #f2f3f5;
+}
+
+.modalValue {
+  font-size: 28rpx;
+  color: #4e5969;
+}
+
+.modalActions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 32rpx;
+}
+
+.modalCancelBtn {
+  flex: 1;
+  height: 88rpx;
+  background: #f7f8fa;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #4e5969;
+}
+
+.modalConfirmBtn {
+  flex: 2;
+  height: 88rpx;
+  background: linear-gradient(135deg, #C8102E 0%, #ff6b6b 100%);
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
 }

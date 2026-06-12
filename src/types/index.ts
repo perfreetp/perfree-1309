@@ -44,6 +44,7 @@ export interface FoodShop {
   distance: string;
   hasCoupon: boolean;
   couponText?: string;
+  couponIds?: string[];
   location: string;
 }
 
@@ -124,4 +125,42 @@ export interface RoutePlan {
   spots: string[];
   tags: string[];
   distance: string;
+}
+
+export type ItineraryItemType = 'scenic' | 'show' | 'food';
+
+export interface ItineraryItem {
+  id: string;
+  type: ItineraryItemType;
+  targetId: string;
+  name: string;
+  image?: string;
+  plannedTime: string;
+  duration: number;
+  distance?: string;
+  walkTime?: string;
+  waitTime?: number;
+  showTime?: string;
+  memberIds: string[];
+  note?: string;
+}
+
+export interface NavTarget {
+  id: string;
+  name: string;
+  icon: string;
+  type: string;
+  distanceMeters: number;
+  leftPct: number;
+  topPct: number;
+}
+
+export interface SquadMemberStatus {
+  memberId: string;
+  name: string;
+  avatar?: string;
+  isOnline: boolean;
+  hasTicket: boolean;
+  gathered: boolean;
+  lastLocation?: string;
 }

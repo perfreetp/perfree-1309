@@ -24,47 +24,137 @@ interface PlanStop {
   detailId?: string;
 }
 
-const getNextShowTime = (name: string): string | undefined => {
+const getNextShowTime = (name: string, currentMin: number): string | undefined => {
   const matched = shows.find((s) => s.name.includes(name) || name.includes(s.name) || s.venue.includes(name));
   if (!matched || !matched.times.length) return undefined;
-  return matched.times[0];
+  const upcoming = matched.times.find((t) => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m > currentMin;
+  });
+  return upcoming || matched.times[matched.times.length - 1];
+};
+
+const timeToMinutes = (t: string): number => {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+};
+
+const getPeriod = (time: string): 'morning' | 'afternoon' | 'evening' => {
+  const m = timeToMinutes(time);
+  if (m < 11 * 60) return 'morning';
+  if (m < 17 * 60) return 'afternoon';
+  return 'evening';
 };
 
 const generatePlan = (): PlanStop[] => {
-  const sorted = [...queueItems].sort((a, b) => a.waitTime - b.waitTime);
-  const plan: PlanStop[] = [];
   const now = new Date();
   const currentMin = now.getHours() * 60 + now.getMinutes();
 
-  sorted.slice(0, 4).forEach((item, idx) => {
+  const itemsWithTime = queueItems.map((item) => {
     const isShow = item.category === '演出';
+    const showTime = isShow ? getNextShowTime(item.name, currentMin) : undefined;
+    const sortTime = showTime
+      ? timeToMinutes(showTime)
+      : currentMin + item.waitTime + 30;
+    const period = showTime ? getPeriod(showTime) : 'afternoon';
     const detailId = isShow
       ? shows.find((s) => s.name.includes(item.name) || item.name.includes(s.name) || s.venue.includes(item.name))?.id
       : undefined;
 
-    const distances = ['50m', '180m', '300m', '220m'];
-    const walkTimes = ['1分钟', '2分钟', '4分钟', '3分钟'];
-    const reasons = [
-      `当前等待仅${item.waitTime}分钟，趁人少先去`,
-      '顺路经过，顺便游览',
-      '即将开场，建议提前到达',
-      '排队时间适中，体验感好',
-    ];
+    const pastShow = isShow && showTime ? timeToMinutes(showTime) <= currentMin : false;
+
+    return {
+      ...item,
+      isShow,
+      showTime,
+      sortTime,
+      period,
+      detailId,
+      pastShow,
+    };
+  });
+
+  const validItems = itemsWithTime.filter((i) => !i.pastShow);
+  const pastItems = itemsWithTime.filter((i) => i.pastShow);
+
+  const scoreItem = (item: typeof validItems[0]): number => {
+    let score = 0;
+    if (item.isShow && item.showTime) {
+      const minsUntil = timeToMinutes(item.showTime) - currentMin;
+      if (minsUntil > 0 && minsUntil < 60) score += 50;
+      else if (minsUntil >= 60 && minsUntil < 180) score += 30;
+      else score += 10;
+    }
+    score += Math.max(0, 40 - item.waitTime);
+    const periodBonus: Record<string, number> = {
+      morning: currentMin < 11 * 60 ? 20 : -10,
+      afternoon: currentMin >= 11 * 60 && currentMin < 17 * 60 ? 20 : 0,
+      evening: currentMin >= 17 * 60 ? 20 : -5,
+    };
+    score += periodBonus[item.period] || 0;
+    return score;
+  };
+
+  const sorted = [...validItems].sort((a, b) => scoreItem(b) - scoreItem(a));
+
+  const plan: PlanStop[] = [];
+  const distances = ['50m', '180m', '300m', '220m'];
+  const walkTimes = ['1分钟', '3分钟', '5分钟', '4分钟'];
+  const reasons = [
+    '距离开场近，趁人少先排队入场',
+    '当前等待时间最短，顺路游玩',
+    '下午黄金时段，排队体验好',
+    '夜场特色演出，强烈推荐',
+  ];
+
+  sorted.slice(0, 4).forEach((item, idx) => {
+    let reason = reasons[idx] || '推荐游玩';
+    if (item.isShow && item.showTime) {
+      const minsUntil = timeToMinutes(item.showTime) - currentMin;
+      if (minsUntil > 0 && minsUntil < 60) {
+        reason = `${Math.floor(minsUntil)}分钟后开场，建议马上过去`;
+      } else if (minsUntil >= 60) {
+        reason = `${Math.floor(minsUntil / 60)}小时后开场，提前到达占好位`;
+      } else {
+        reason = '今日最后一场，别错过';
+      }
+    } else if (item.waitTime <= 10) {
+      reason = `当前仅${item.waitTime}分钟，错峰好时机`;
+    }
 
     plan.push({
       id: item.id,
       name: item.name,
       category: item.category,
-      type: isShow ? 'show' : 'scenic',
+      type: item.isShow ? 'show' : 'scenic',
       waitTime: item.waitTime,
       distance: distances[idx] || '150m',
       walkTime: walkTimes[idx] || '2分钟',
-      nextShowTime: isShow ? getNextShowTime(item.name) : undefined,
+      nextShowTime: item.showTime,
       image: item.image,
-      reason: reasons[idx] || '推荐游玩',
-      detailId,
+      reason,
+      detailId: item.detailId,
     });
   });
+
+  if (plan.length < 4 && pastItems.length > 0) {
+    pastItems.slice(0, 4 - plan.length).forEach((item, idx) => {
+      plan.push({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        type: item.isShow ? 'show' : 'scenic',
+        waitTime: item.waitTime,
+        distance: '350m',
+        walkTime: '6分钟',
+        nextShowTime: item.showTime,
+        image: item.image,
+        reason: '今日场次已过，可明天再来',
+        detailId: item.detailId,
+      });
+    });
+  }
+
   return plan;
 };
 

@@ -28,20 +28,60 @@
   }
 }
 
-.squadTitle {
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
-  margin-bottom: $spacing-xs;
+.squadHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
   position: relative;
   z-index: 1;
 }
 
+.squadTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
 .squadCode {
-  font-size: $font-size-sm;
-  opacity: 0.8;
+  font-size: $font-size-xs;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.squadStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: $spacing-md 0;
   margin-bottom: $spacing-md;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $radius-md;
   position: relative;
   z-index: 1;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.statNum {
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.statLabel {
+  font-size: 22rpx;
+  opacity: 0.8;
+}
+
+.statDivider {
+  width: 2rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .squadMembers {
@@ -49,6 +89,15 @@
   gap: $spacing-sm;
   position: relative;
   z-index: 1;
+  flex-wrap: wrap;
+}
+
+.memberAvatarWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .memberAvatar {
@@ -61,19 +110,59 @@
   align-items: center;
   justify-content: center;
   font-size: 28rpx;
+  font-weight: 600;
   position: relative;
 
-  &.online::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 16rpx;
-    height: 16rpx;
-    background: $color-success;
-    border-radius: 50%;
-    border: 2rpx solid $color-primary;
+  &.online {
+    border-color: #52c41a;
   }
+
+  &.gathered {
+    background: rgba(255, 255, 255, 0.95);
+    color: $color-primary;
+    border-color: #fff;
+  }
+}
+
+.memberAvatarName {
+  font-size: 20rpx;
+  opacity: 0.9;
+}
+
+.ticketBadge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  font-size: 24rpx;
+  background: #ffb020;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #fff;
+}
+
+.gatheredBadge {
+  position: absolute;
+  bottom: 36rpx;
+  right: -4rpx;
+  font-size: 18rpx;
+  background: #52c41a;
+  color: #fff;
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #fff;
+}
+
+.memberAvatarName {
+  font-size: 20rpx;
+  opacity: 0.9;
 }
 
 .addMember {
@@ -147,36 +236,112 @@
   padding: $spacing-sm 0;
 }
 
+.memberAvatarBig {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe4e1 0%, #ffcdd2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.memberAvatarText {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-primary;
+}
+
+.onlineDot {
+  position: absolute;
+  right: 4rpx;
+  bottom: 4rpx;
+  width: 20rpx;
+  height: 20rpx;
+  background: #52c41a;
+  border-radius: 50%;
+  border: 3rpx solid #fff;
+}
+
 .memberInfo {
   flex: 1;
+  min-width: 0;
+}
+
+.memberNameRow {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
 }
 
 .memberName {
   font-size: $font-size-md;
-  font-weight: $font-weight-medium;
+  font-weight: $font-weight-semibold;
   color: $color-text-primary;
-  margin-bottom: 4rpx;
 }
 
-.memberStatus {
-  font-size: $font-size-sm;
-  color: $color-text-tertiary;
+.gatherTag {
+  background: #f6ffed;
+  border: 1rpx solid #b7eb8f;
+  padding: 2rpx 12rpx;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  color: #52c41a;
+}
+
+.memberSub {
   display: flex;
   align-items: center;
-  gap: $spacing-xs;
+  gap: 8rpx;
+  font-size: 24rpx;
+  flex-wrap: wrap;
 }
 
-.statusDot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
+.ticketLabel {
+  color: #ff7a45;
+  font-size: 22rpx;
+}
 
-  &.online {
-    background: $color-success;
-  }
+.noTicketLabel {
+  color: #faad14;
+  font-size: 22rpx;
+}
 
-  &.offline {
-    background: $color-text-disabled;
+.memberDistance {
+  color: $color-text-tertiary;
+  font-size: 22rpx;
+}
+
+.memberActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  align-items: flex-end;
+}
+
+.ticketBtn {
+  padding: 8rpx 20rpx;
+  background: linear-gradient(135deg, #ffb020 0%, #ff8a00 100%);
+  color: #fff;
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.gatherBtn {
+  padding: 8rpx 20rpx;
+  background: #f0f0f0;
+  color: #86909c;
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+
+  &.gatherBtnActive {
+    background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+    color: #fff;
   }
 }
 
@@ -263,4 +428,99 @@
   &:active {
     opacity: 0.9;
   }
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.ticketModal {
+  width: 85%;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  position: relative;
+}
+
+.ticketModalTitle {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1d2129;
+  text-align: center;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.ticketModalType {
+  font-size: 26rpx;
+  color: #86909c;
+  text-align: center;
+  display: block;
+  margin-bottom: 32rpx;
+}
+
+.qrBox {
+  background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+  border: 2rpx dashed #e5e6eb;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  margin-bottom: 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.qrCode {
+  color: #1d2129;
+  line-height: 1;
+}
+
+.qrText {
+  font-size: 24rpx;
+  color: #86909c;
+}
+
+.ticketInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f2f3f5;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.ticketInfoLabel {
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+.ticketInfoValue {
+  font-size: 26rpx;
+  color: #1d2129;
+  font-weight: 500;
+}
+
+.ticketClose {
+  margin-top: 32rpx;
+  height: 80rpx;
+  background: #f7f8fa;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #4e5969;
 }
